@@ -3,6 +3,14 @@ A somewhat functional JavaScript Markdown parser, strong in formulas [Web Site](
 
 ## Usage
 
+Add to header
+
+```html
+<script type="text/javascript" src="https://raw.githubusercontent.com/UmemotoCtrl/MarkdownParser/master/docs/js/mdp.js"></script>
+```
+
+and  `var parsed_html = mdp(markdown_text);`. Of course, you can download and use it. Copy and paste is also valid because this script is very short.
+
 ## Feature
 
 ### Advantage
@@ -16,7 +24,7 @@ A somewhat functional JavaScript Markdown parser, strong in formulas [Web Site](
 * Blank lines behind the table are required.
 * Table does not support cell joining.
 * Lists are separated by a blank line.
-* No <p> tags are created in the list.
+* No `<p>` tags are created in the list.
 * List is nested by spaces (non-tab), nested with more than 2 spaces.
 * The beginning of the number list is always 1, there is no beginning in 2 or more.
 * Only $$ is supported for independent line formulas. Putting $$ in a line which should have only $$.
