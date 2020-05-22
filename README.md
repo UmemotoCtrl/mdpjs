@@ -3,13 +3,13 @@ A somewhat functional JavaScript Markdown parser, strong in formulas [Web Site](
 
 ## Usage
 
-Add to header
+Download [mdp.js](https://github.com/UmemotoCtrl/MarkdownParser/blob/master/docs/js/mdp.js), and add to header 
 
 ```html
-<script type="text/javascript" src="https://raw.githubusercontent.com/UmemotoCtrl/MarkdownParser/master/docs/js/mdp.js"></script>
+<script type="text/javascript" src="js/mdp.js"></script>
 ```
 
-and  `var parsed_html = mdp(markdown_text);`. Of course, you can download and use it. Copy and paste is also valid because this script is very short.
+where src should match your environment, then`var parsed_html = mdp(markdown_text);`. Of course, you can download and use it. Copy and paste is also valid because this script is very short.
 
 ## Feature
 
