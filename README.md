@@ -20,15 +20,14 @@ where src should match your environment, then`var parsed_html = mdp(markdown_tex
 
 ### Limiatation
 
-* **This script ONLY confirmed in Google Chrome.**
-* Title must be placed at the beginning of the file with "#".
+* **This script was confirmed in Google Chrome, IE11, and Edge.**
 * Blank lines behind the table are required.
 * Table does not support cell joining.
 * Lists are separated by a blank line.
 * No `<p>` tags are created in the list.
 * List is nested by spaces (non-tab), nested with more than 2 spaces.
 * The beginning of the number list is always 1, there is no beginning in 2 or more.
-* Only $$ is supported for independent line formulas. Putting $$ in a line which should have only $$.
+* Only `$$` is supported for independent line formulas. Putting `$$` in a line which should have only $$.
 * For code blocks, the code type MUST be required, such as "````clang".
 * (may not a problem) dedicated delim+"..." Paragraphs denoted by +delim cannot be processed.	
 
