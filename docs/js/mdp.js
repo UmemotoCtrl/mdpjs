@@ -129,8 +129,8 @@ function mdListParser ( argText, listType ) {
 function restore( argText, tag, aftText, regex, restore) {
 	for (let jj = 0; jj < (aftText||[]).length; jj++) {
 		switch (tag){
-			case "MB":case "CB":case "CM":
-				var temp = aftText[jj].replace( regex, restore );
+			case "MB":case "CB":case "CM":	// $ is reduced in replace method
+				var temp = aftText[jj].replace( /\$/g, "$$$$").replace( regex, restore );
 				argText = argText.replace( delim+tag+delim, temp );
 				break;
 			case "TB":
@@ -169,10 +169,6 @@ function mdp( argText ) {
 	var stringArray = new Array();
 	var restoreArray = new Array();
 	var resRegexArray = new Array();
-	tagArray.push("MB");
-	regexArray.push( new RegExp("\\n\\${2}\\n[\\s\\S]+?\\n\\${2}(?=\\n)", 'g') );
-	restoreArray.push( "$$$1$$" );
-	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
 	tagArray.push("CB");
 	regexArray.push( new RegExp("\\n\\`\\`\\`.+?\\n[\\s\\S]*?\\n\\`\\`\\`(?=\\n)", 'g') );
 	restoreArray.push( "<pre><code class='language-$1'>$2</code></pre>" );
@@ -181,6 +177,10 @@ function mdp( argText ) {
 	regexArray.push( new RegExp("\\n<!--[\\s\\S]*?-->(?=\\n)", 'g') );
 	restoreArray.push( "$1" );
 	resRegexArray.push( new RegExp("^\\n*(<!--[\\s\\S]*?-->)\\n*$") );
+	tagArray.push("MB");
+	regexArray.push( new RegExp("\\n\\${2}\\n[\\s\\S]+?\\n\\${2}(?=\\n)", 'g') );
+	restoreArray.push( "$1" );
+	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
 
 	for (let jj = 1; jj < 5; jj++) {
 		tagArray.push("H"+jj);
