@@ -40,7 +40,7 @@ $(function() {
 	$("textarea#mdinput").on('input', function() {
 		// console.log("input event");
 		$("#article").html( mdp($("textarea#mdinput").val()) );
-		$("#raw").html( mdp($data).replace(/</g,'&lt;').replace(/>/g,'&gt;') );
+		$("#raw").html( mdp($("textarea#mdinput").val()).replace(/</g,'&lt;').replace(/>/g,'&gt;') );
 		// for MathJax
 		try {
 			MathJax.typeset();

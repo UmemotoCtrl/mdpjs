@@ -183,6 +183,11 @@ function mdp( argText ) {
 	restoreArray.push( "<pre><code class='language-$1'>$2</code></pre>" );
 	resRegexArray.push( new RegExp("^\\n*\\`\\`\\`(.+?)\\n([\\s\\S]*)\\n\\`\\`\\`\\n*$") );
 
+	tagArray.push("CM");
+	regexArray.push( new RegExp("\\n<!--[\\s\\S]*?-->(?=\\n)", 'g') );
+	restoreArray.push( "$1" );
+	resRegexArray.push( new RegExp("^\\n*(<!--[\\s\\S]*?-->)\\n*$") );
+
 	tagArray.push("HR");
 	regexArray.push( new RegExp("\\n\\s*?-{3,}\\s*(?=\\n)", 'g') );
 	restoreArray.push( "<hr>" );
