@@ -97,11 +97,10 @@ function mdListParser ( argText, listType ) {
 	for (let jj = 0; jj < (lines||[]).length; jj++) {
 		lineDepth = checkListDepth(lines[jj]);
 		lineType = checkListType(lines[jj]);
-		if ( lineDepth == depth && lineType == listType) {
-			// add to list
+		if ( lineDepth == depth && lineType == listType) {	// add new item
 			retText += "<li>"+lines[jj].replace(listRegex, "$1");
 			for (let kk = jj+1; kk < (lines||[]).length; kk++) {
-				if ( lines[kk]!=null && checkListType(lines[kk]) == "RW" ) {
+				if ( checkListType(lines[kk]) == "RW" ) {
 					retText += lines[kk]+"\n";
 				} else {
 					jj = kk-1;
@@ -109,14 +108,10 @@ function mdListParser ( argText, listType ) {
 				}
 			}
 			retText += "</li>\n"
-		} else if ( lineDepth >= depth+2 ) {
-			// create nested list
+		} else if ( lineDepth >= depth+2 ) {	// create nested list
 			var tempText = lines[jj]+"\n";
 			for (let kk = jj+1; kk < (lines||[]).length; kk++) {
-				if ( lines[kk]!=null && lineDepth>checkListDepth(lines[kk]) ) {
-					console.log(
-						tempText
-					);
+				if ( lineDepth>checkListDepth(lines[kk]) ) {
 					retText += mdListParser ( tempText, lineType ).replace(/\n$/, "");
 					jj = kk-1;
 					break;
@@ -124,7 +119,6 @@ function mdListParser ( argText, listType ) {
 					tempText += lines[kk]+"\n";
 				}
 			}
-		} else {
 		}
 	}
 
@@ -134,27 +128,34 @@ function mdListParser ( argText, listType ) {
 
 function restore( argText, tag, aftText, regex, restore) {
 	for (let jj = 0; jj < (aftText||[]).length; jj++) {
-		if (tag=="MB" || tag=="CB") {
-			var temp = aftText[jj].replace( regex, restore );
-			argText = argText.replace( delim+tag+delim, temp );
-		} else if (tag=="TB") {
-			var temp = aftText[jj].replace( regex, restore );
-			argText = argText.replace( delim+tag+delim, mdLineParser( temp, mdTBParser, null ) );
-			// argText = argText.replace( delim+tag+delim, mdTBParser(temp) );	// without md parse in table
-		} else if (tag=="UL") {
-			var temp = aftText[jj].replace( regex, restore );
-			argText = argText.replace( delim+tag+delim, mdLineParser( temp, mdListParser, "UL" ) );
-			// argText = argText.replace( delim+tag+delim, mdListParser(temp, "UL") );	// without md parse in list
-		} else if (tag=="OL") {
-			var temp = aftText[jj].replace( regex, restore );
-			argText = argText.replace( delim+tag+delim, mdLineParser( temp, mdListParser, "OL" ) );
-			// argText = argText.replace( delim+tag+delim, mdListParser(temp, "OL") );	// without md parse in list
-		} else {
-			var temp = aftText[jj].replace( regex, restore );
-			temp = mdLineParser(temp, null, null);
-			argText = argText.replace( delim+tag+delim, temp );
+		switch (tag){
+			case "MB":case "CB":case "CM":
+				var temp = aftText[jj].replace( regex, restore );
+				argText = argText.replace( delim+tag+delim, temp );
+				break;
+			case "TB":
+				var temp = aftText[jj].replace( regex, restore );
+				argText = argText.replace( delim+tag+delim, mdLineParser( temp, mdTBParser, null ) );
+				// argText = argText.replace( delim+tag+delim, mdTBParser(temp) );	// without md parse in table
+				break;
+			case "UL":case "OL":
+				var temp = aftText[jj].replace( regex, restore );
+				argText = argText.replace( delim+tag+delim, mdLineParser( temp, mdListParser, tag ) );
+				// argText = argText.replace( delim+tag+delim, mdListParser(temp, tag) );	// without md parse in list
+				break;
+			default:
+				if (/H\d/.test(tag)) {
+					var temp = aftText[jj].replace(/'/g, "").replace( regex, restore );
+					temp = mdLineParser(temp, null, null);
+					argText = argText.replace( delim+tag+delim, temp );
+				} else {
+					var temp = aftText[jj].replace( regex, restore );
+					temp = mdLineParser(temp, null, null);
+					argText = argText.replace( delim+tag+delim, temp );
+				}
+				break;
 		}
-}
+	}
 	return argText;
 }
 
@@ -168,43 +169,25 @@ function mdp( argText ) {
 	var stringArray = new Array();
 	var restoreArray = new Array();
 	var resRegexArray = new Array();
-	tagArray.push("H1");
-	regexArray.push( new RegExp("\\n#\\s+.*?(?=\\n)", 'g') );
-	restoreArray.push( "<h1 class='$1'>$1</h1>" );
-	resRegexArray.push( new RegExp("^\\n*#\\s+(.*?)\\n*$") );
-
 	tagArray.push("MB");
 	regexArray.push( new RegExp("\\n\\${2}\\n[\\s\\S]+?\\n\\${2}(?=\\n)", 'g') );
 	restoreArray.push( "$$$1$$" );
 	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
-
 	tagArray.push("CB");
 	regexArray.push( new RegExp("\\n\\`\\`\\`.+?\\n[\\s\\S]*?\\n\\`\\`\\`(?=\\n)", 'g') );
 	restoreArray.push( "<pre><code class='language-$1'>$2</code></pre>" );
 	resRegexArray.push( new RegExp("^\\n*\\`\\`\\`(.+?)\\n([\\s\\S]*)\\n\\`\\`\\`\\n*$") );
-
 	tagArray.push("CM");
 	regexArray.push( new RegExp("\\n<!--[\\s\\S]*?-->(?=\\n)", 'g') );
 	restoreArray.push( "$1" );
 	resRegexArray.push( new RegExp("^\\n*(<!--[\\s\\S]*?-->)\\n*$") );
 
-	tagArray.push("HR");
-	regexArray.push( new RegExp("\\n\\s*?-{3,}\\s*(?=\\n)", 'g') );
-	restoreArray.push( "<hr>" );
-	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
-
-	tagArray.push("H2");
-	regexArray.push( new RegExp("\\n##\\s+.*?(?=\\n)", 'g') );
-	restoreArray.push( "<h2 class='$1'>$1</h2>" );
-	resRegexArray.push( new RegExp("\\n##\\s+(.*)\\n*") );
-	tagArray.push("H3");
-	regexArray.push( new RegExp("\\n###\\s+.*?(?=\\n)", 'g') );
-	restoreArray.push( "<h3 class='$1'>$1</h3>" );
-	resRegexArray.push( new RegExp("\\n###\\s+(.*)\\n*") );
-	tagArray.push("H4");
-	regexArray.push( new RegExp("\\n####\\s+.*?(?=\\n)", 'g') );
-	restoreArray.push( "<h4 class='$1'>$1</h4>" );
-	resRegexArray.push( new RegExp("\\n####\\s+(.*)\\n*") );
+	for (let jj = 1; jj < 5; jj++) {
+		tagArray.push("H"+jj);
+		regexArray.push( new RegExp("\\n#{"+jj+"}\\s+.*?(?=\\n)", 'g') );
+		restoreArray.push( "<h"+jj+" class='$1'>$1</h"+jj+">" );
+		resRegexArray.push( new RegExp("^\\n*#{"+jj+"}\\s+(.*?)\\n*$") );
+	}
 
 	tagArray.push("TB");
 	regexArray.push( new RegExp("\\n\\n\\|.+?\\|\\s*?\\n\\|[-|\\s]*?\\|\\s*?\\n\\|.+?\\|[\\s\\S]*?(?=\\n\\n)", 'g') );
@@ -218,6 +201,10 @@ function mdp( argText ) {
 	regexArray.push( new RegExp("\\n\\d+?\\.\\s[\\s\\S]*?(?=\\n\\n)", 'g') );
 	restoreArray.push( "$1" );
 	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
+	tagArray.push("HR");
+	regexArray.push( new RegExp("\\n\\s*?-{3,}\\s*(?=\\n)", 'g') );
+	restoreArray.push( "<hr>" );
+	resRegexArray.push( new RegExp("^\\n*[\\s\\S]*\\n*$") );
 
 	// Convert Structure Notation
 	for (let ii = 0; ii < tagArray.length; ii++) {
@@ -226,7 +213,7 @@ function mdp( argText ) {
 	}
 	// Convert Structure Notation for P tag
 	var regexpDiv = new RegExp('^\\n*'+delim+'..'+delim+'(?=\\n*$)', 'g');
-	evPP = argText.match(/\n.[\s\S]*?(?=\n\n)/g).filter(function(value) {
+	evPP = argText.match(/\n.+?[\s\S]*?(?=\n\n)/g).filter(function(value) {
 		var tempValue = value.match(regexpDiv);
 		if (tempValue == null) return value;
 		else return null;
@@ -239,28 +226,8 @@ function mdp( argText ) {
 	restoreArray.push( "<p>$1</p>" );
 	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
 	stringArray.push( evPP );
+	argText = argText.replace(/\n{2,}/g, "\n");
 
-	// Sort
-	for (let ii = 0; ii < tagArray.length; ii++) {
-		if (tagArray[ii] == 'MB') {
-			tagArray.push(tagArray.splice(ii,1)[0]);
-			regexArray.push(regexArray.splice(ii,1)[0]);
-			stringArray.push(stringArray.splice(ii,1)[0]);
-			restoreArray.push(restoreArray.splice(ii,1)[0]);
-			resRegexArray.push(resRegexArray.splice(ii,1)[0]);
-			break;
-		}
-	}
-	for (let ii = 0; ii < tagArray.length; ii++) {
-		if (tagArray[ii] == 'CB') {
-			tagArray.push(tagArray.splice(ii,1)[0]);
-			regexArray.push(regexArray.splice(ii,1)[0]);
-			stringArray.push(stringArray.splice(ii,1)[0]);
-			restoreArray.push(restoreArray.splice(ii,1)[0]);
-			resRegexArray.push(resRegexArray.splice(ii,1)[0]);
-			break;
-		}
-	}
 	// Restore to html
 	for (let ii = 0; ii < tagArray.length; ii++) {
 		argText = restore( argText, tagArray[ii], stringArray[ii], resRegexArray[ii], restoreArray[ii]);
