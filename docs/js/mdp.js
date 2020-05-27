@@ -216,27 +216,16 @@ function mdp( argText ) {
 	regexArray.push( new RegExp("\\n\\s*?-{3,}\\s*(?=\\n)", 'g') );
 	restoreArray.push( "<hr>" );
 	resRegexArray.push( new RegExp("^\\n*[\\s\\S]*\\n*$") );
+	tagArray.push("PP");
+	regexArray.push( new RegExp("\\n[^&\\n][\\s\\S]*?(?=\\n\\n)", 'g') );
+	restoreArray.push( "<p>$1</p>" );
+	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
 
 	// Convert Structure Notation
 	for (let ii = 0; ii < tagArray.length; ii++) {
 		stringArray.push( argText.match(regexArray[ii]) );
 		argText = argText.replace( regexArray[ii], "\n\n"+delim+tagArray[ii]+delim+"\n\n" );
 	}
-	// Convert Structure Notation for P tag
-	var regexpDiv = new RegExp('^\\n*'+delim+'..'+delim+'(?=\\n*$)', 'g');
-	evPP = argText.match(/\n.+?[\s\S]*?(?=\n\n)/g).filter(function(value) {
-		var tempValue = value.match(regexpDiv);
-		if (tempValue == null) return value;
-		else return null;
-	});
-	for (let ii = 0; ii < (evPP||[]).length; ii++) {
-		argText = argText.replace(evPP[ii], delim+"PP"+delim);
-	}
-	tagArray.push("PP");
-	regexArray.push( new RegExp("", 'g') );
-	restoreArray.push( "<p>$1</p>" );
-	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
-	stringArray.push( evPP );
 	argText = argText.replace(/\n{2,}/g, "\n");
 
 	// Restore to html

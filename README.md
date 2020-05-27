@@ -21,6 +21,7 @@ where src should match your environment, then`var parsed_html = mdp(markdown_tex
 ### Limiatation
 
 * **This script was confirmed in Google Chrome, safari, IE11, and Edge including android and iOS.**
+* Paragraphs cannot start with `&`.
 * Blank lines behind the table are required.
 * Table does not support cell joining.
 * Lists are separated by a blank line.
