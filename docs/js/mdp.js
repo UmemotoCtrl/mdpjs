@@ -92,13 +92,13 @@ function mdListParser ( argText, listType ) {
 		listRegex = new RegExp("^\\s*?\\d+\\.\\s+(.*?)$");
 	else
 		listRegex = new RegExp("^\\s*?[-+*]\\s+(.*?)$");
-	retText += "<"+listType.toLowerCase()+">\n";
+	retText += "<"+listType.toLowerCase()+"><li>";
 	var lineDepth, lineType;
 	for (let jj = 0; jj < (lines||[]).length; jj++) {
 		lineDepth = checkListDepth(lines[jj]);
 		lineType = checkListType(lines[jj]);
 		if ( lineDepth == depth && lineType == listType) {	// add new item
-			retText += "<li>"+lines[jj].replace(listRegex, "$1");
+			retText += "</li>\n<li>"+lines[jj].replace(listRegex, "$1");
 			for (let kk = jj+1; kk < (lines||[]).length; kk++) {
 				if ( checkListType(lines[kk]) == "RW" ) {
 					retText += lines[kk]+"\n";
@@ -107,23 +107,34 @@ function mdListParser ( argText, listType ) {
 					break;
 				}
 			}
-			retText += "</li>\n"
 		} else if ( lineDepth >= depth+2 ) {	// create nested list
-			var tempText = lines[jj]+"\n";
-			for (let kk = jj+1; kk < (lines||[]).length; kk++) {
-				if ( lineDepth>checkListDepth(lines[kk]) ) {
+			var tempText = "";
+			for (let kk = jj; kk < (lines||[]).length; kk++) {
+				if ( checkListType(lines[kk]) == "RW" ){
+					tempText += lines[kk]+"\n";
+					if ( kk+1==(lines||[]).length ) {
+						retText += mdListParser ( tempText, lineType ).replace(/\n$/, "");
+						jj = kk;
+						break; 
+					}
+				} else if ( lineDepth>checkListDepth(lines[kk]) ) {
 					retText += mdListParser ( tempText, lineType ).replace(/\n$/, "");
 					jj = kk-1;
 					break;
 				} else {
 					tempText += lines[kk]+"\n";
+					if ( kk+1==(lines||[]).length ) {
+						retText += mdListParser ( tempText, lineType ).replace(/\n$/, "");
+						jj = kk;
+						break; 
+					}
 				}
 			}
 		}
 	}
 
-	retText += "</"+listType.toLowerCase()+">\n";
-	return retText;
+	retText += "</li></"+listType.toLowerCase()+">\n";
+	return retText.replace(/<li>\n*<\/li>/g, "");
 }
 
 function restore( argText, tag, aftText, regex, restore) {
@@ -194,11 +205,11 @@ function mdp( argText ) {
 	restoreArray.push( "$1" );
 	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
 	tagArray.push("UL");
-	regexArray.push( new RegExp("\\n[-+*]\\s[\\s\\S]*?(?=\\n\\n)", 'g') );
+	regexArray.push( new RegExp("\\n\\s*[-+*]\\s[\\s\\S]*?(?=\\n\\n)", 'g') );
 	restoreArray.push( "$1" );
 	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
 	tagArray.push("OL");
-	regexArray.push( new RegExp("\\n\\d+?\\.\\s[\\s\\S]*?(?=\\n\\n)", 'g') );
+	regexArray.push( new RegExp("\\n\\s*\\d+?\\.\\s[\\s\\S]*?(?=\\n\\n)", 'g') );
 	restoreArray.push( "$1" );
 	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
 	tagArray.push("HR");
