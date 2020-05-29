@@ -34,25 +34,44 @@ function mdLineParser( argText, func, listType ) {
 function mdTBParser( argText ) {
 	var retText = "";
 	var lineText = argText.split(/\n/);
+	// For 2nd line
+	var items = lineText[1].replace(/^\|\s*/, "").replace(/\s*\|$/, "").split(/\s*\|\s*/g);
+	var alignText = new Array();
+	for (let jj = 0; jj < items.length; jj++) {
+		if ( /^:[\s-]+:$/.test(items[jj]) )
+			alignText.push(" style='text-align:center'");	// center align
+		else if( /^:[\s-]+$/.test(items[jj]) )
+			alignText.push(" style='text-align:left'");		// left align
+		else if( /^[\s-]+:$/.test(items[jj]) )
+			alignText.push(" style='text-align:right'");	// right align
+		else
+			alignText.push("");
+	}
+	// For 1st line
 	retText = "<table>\n";
 	retText +=  "<thead><tr>\n";
-	var items = lineText[0].replace(/^\|\s*/, "").replace(/\s*\|$/, "").split(/\s*\|\s*/g);
-	for (let jj = 0; jj < items.length; jj++) {
-		retText +=  "<th>" + items[jj] + "</th>\n";
+	items = lineText[0].replace(/^\|\s*/, "").replace(/\s*\|$/, "").split(/\s*\|\s*/g);
+	for (let jj = 0; jj < alignText.length; jj++) {
+		retText +=  "<th"+alignText[jj]+">" + items[jj] + "</th>\n";
 	}
+	// For 3rd and more
 	retText +=  "</tr></thead>\n";
 	retText +=  "<tbody>\n";
 	for (let kk = 2; kk < lineText.length; kk++) {
-		var items = lineText[kk].replace(/^\|\s*/, "").replace(/\s*\|$/, "").split(/\s*\|\s*/g);
+		lineText[kk] = lineText[kk].replace(/^\|\s*/, "");
+		items = lineText[kk].split(/\s*\|+\s*/g);
+		var colDivText = lineText[kk].replace(/\s/g, "").match(/\|+/g);
 		retText +=  "<tr>\n";
-		for (let jj = 0; jj < items.length; jj++) {
-			retText +=  "<td>" + items[jj] + "</td>\n";
+		for (let jj = 0; jj < (colDivText||[]).length; jj++) {
+			if (colDivText[jj] == "|")
+				retText +=  "<td"+alignText[jj]+">" + items[jj] + "</td>\n";
+			else
+				retText +=  "<td"+alignText[jj]+" colspan='"+colDivText[jj].length+"'>" + items[jj] + "</td>\n";
 		}
 		retText +=  "</tr>\n";
 	}
 	retText +=  "</tbody></table>\n";
-	argText = retText;
-	return argText;
+	return retText;
 }
 function checkListDepth ( argLine ) {
 	var listType = checkListType ( argLine );
