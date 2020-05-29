@@ -201,7 +201,7 @@ function mdp( argText ) {
 	}
 
 	tagArray.push("TB");
-	regexArray.push( new RegExp("\\n\\n\\|.+?\\|\\s*?\\n\\|[-|\\s]*?\\|\\s*?\\n\\|.+?\\|[\\s\\S]*?(?=\\n\\n)", 'g') );
+	regexArray.push( new RegExp("\\n\\n\\|.+?\\|\\s*?\\n\\|[-:|\\s]*?\\|\\s*?\\n\\|.+?\\|[\\s\\S]*?(?=\\n\\n)", 'g') );
 	restoreArray.push( "$1" );
 	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
 	tagArray.push("UL");
