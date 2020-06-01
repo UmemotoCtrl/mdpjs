@@ -70,7 +70,7 @@ function mdTBParser( argText ) {
 		}
 		retText +=  "</tr>\n";
 	}
-	retText +=  "</tbody></table>\n";
+	retText +=  "</tbody></table>";
 	return retText;
 }
 function checkListDepth ( argLine ) {
@@ -135,7 +135,7 @@ function mdListParser ( argText, listType ) {
 						retText += mdListParser ( tempText, lineType ).replace(/\n$/, "");
 						jj = kk;
 						break; 
-					}
+					} 
 				} else if ( lineDepth>checkListDepth(lines[kk]) ) {
 					retText += mdListParser ( tempText, lineType ).replace(/\n$/, "");
 					jj = kk-1;
@@ -152,7 +152,7 @@ function mdListParser ( argText, listType ) {
 		}
 	}
 
-	retText += "</li></"+listType.toLowerCase()+">\n";
+	retText += "</li></"+listType.toLowerCase()+">";
 	return retText.replace(/<li>\n*<\/li>/g, "");
 }
 
@@ -224,11 +224,11 @@ function mdp( argText ) {
 	restoreArray.push( "$1" );
 	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
 	tagArray.push("UL");
-	regexArray.push( new RegExp("\\n\\s*[-+*]\\s[\\s\\S]*?(?=\\n\\n)", 'g') );
+	regexArray.push( new RegExp("\\n\\n\\s*[-+*]\\s[\\s\\S]*?(?=\\n\\n)", 'g') );
 	restoreArray.push( "$1" );
 	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
 	tagArray.push("OL");
-	regexArray.push( new RegExp("\\n\\s*\\d+?\\.\\s[\\s\\S]*?(?=\\n\\n)", 'g') );
+	regexArray.push( new RegExp("\\n\\n\\s*\\d+?\\.\\s[\\s\\S]*?(?=\\n\\n)", 'g') );
 	restoreArray.push( "$1" );
 	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
 	tagArray.push("HR");
