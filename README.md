@@ -16,18 +16,16 @@ where src should match your environment, then`var parsed_html = mdp(markdown_tex
 ### Advantage
 
 * Do not react to markdown control symbols in formulas and comments.
-* Supports semi-infinite nested lists, with or without numbers.
+*  `$$ ... $$` and `\[ ... \]` are supported for independent line formulas. Putting a line which should have only `$$`, `\[`, or `\]`.
+* Supports deep nested lists, with or without numbers.
+* This script was confirmed in Google Chrome, safari, IE11, and Edge including android and iOS.
 
-### Limiatation
+### Limiatation and Notation
 
-* **This script was confirmed in Google Chrome, safari, IE11, and Edge including android and iOS.**
-* Paragraphs cannot start with `&`.
-* Blank lines behind the table are required.
-* Lists are separated by a blank line.
+* Paragraphs cannot start with `&` which can be changed by a setting variable.
+* A blank line behind the tables and lists is required.
 * No `<p>` tags are created in the list.
-* List is nested by spaces (non-tab), nested with more than 2 spaces.
 * The beginning of the number list is always 1, there is no beginning in 2 or more.
-* Only `$$` is supported for independent line formulas. Putting `$$` in a line which should have only $$.
-* For code blocks, the code type MUST be required, such as "````clang".
-* (may not a problem) dedicated delim+"..." Paragraphs denoted by +delim cannot be processed.	
+
+
 

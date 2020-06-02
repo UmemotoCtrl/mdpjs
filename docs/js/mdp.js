@@ -1,11 +1,15 @@
-var delim = "&&";
+const delim = "&&";
+const mathDelim1 = new Array("\\${2}", "\\${2}");	// in Regex form, = "$$ ... $$"
+const mathDelim2 = new Array("\\\\\[", "\\\\\]");	// in Regex form, altanative, = "\[ ... \]"
+const tabTo = "  ";
+const codeLangPrefix = "language-";
 
-function mdLineParser( argText, func, listType ) {
+function mdInlineParser( argText, argFunc, listType ) {
 	// Evacuating comments and formulas --
-	var evacuatedText;
+	let evacuatedText;
 	evacuatedText = argText.match(  /`(.+?)`/g );
 	argText       = argText.replace(/`(.+?)`/g, delim+delim+"IC"+delim+delim);
-	var evacuatedMath;
+	let evacuatedMath;
 	evacuatedMath = argText.match(  /\$(.+?)\$/g );
 	argText       = argText.replace(/\$(.+?)\$/g, delim+delim+"IM"+delim+delim);
 	// -- Evacuating comments and formulas
@@ -14,30 +18,30 @@ function mdLineParser( argText, func, listType ) {
 	argText = argText.replace(/~~(.+?)~~/g, "<strike>$1</strike>");	// Strike
 	argText = argText.replace(/\*(.+?)\*/g, "<em>$1</em>");	// Emphasize
 
-	if (func != null && listType != null)
-		argText = func(argText, listType);
-	else if (func != null && listType == null)
-		argText = func(argText);
+	if (argFunc != null && listType != null)
+		argText = argFunc(argText, listType);
+	else if (argFunc != null && listType == null)
+		argText = argFunc(argText);
 	
 	// Restoring comments and formulas --
 	if (evacuatedMath != null)
 		for (let ii = 0; ii < evacuatedMath.length; ii++)
 			argText = argText.replace(delim+delim+"IM"+delim+delim, evacuatedMath[ii]);
 	if (evacuatedText != null)
-		for (let ii = 0; ii < evacuatedText.length; ii++)
+		for (let ii = 0; ii < evacuatedText.length; ii++)	// $ is reduced in replace method
 			argText = argText.replace(delim+delim+"IC"+delim+delim,
-				"<code>"+ evacuatedText[ii].replace(/`/g,"").replace(/</g,'&lt;').replace(/>/g,'&gt;') +"</code>");
+				"<code>"+ evacuatedText[ii].replace( /\$/g, "$$$$$$").replace(/`/g,"").replace(/</g,'&lt;').replace(/>/g,'&gt;') +"</code>");
 	// -- Restoring comments and formulas
 	return argText;
 }
 
 function mdTBParser( argText ) {
-	var retText = "";
-	var lineText = argText.split(/\n/);
+	let retText = "";
+	let lineText = argText.split(/\n/);
 	// For 2nd line
-	var items = lineText[1].replace(/^\|\s*/, "").replace(/\s*\|$/, "").split(/\s*\|\s*/g);
-	var alignText = new Array();
-	for (let jj = 0; jj < items.length; jj++) {
+	let items = lineText[1].replace(/^\|\s*/, "").replace(/\s*\|$/, "").split(/\s*\|\s*/g);
+	let alignText = new Array();
+	for (let jj = 0; jj < items.length; jj++)
 		if ( /^:[\s-]+:$/.test(items[jj]) )
 			alignText.push(" style='text-align:center'");	// center align
 		else if( /^:[\s-]+$/.test(items[jj]) )
@@ -46,48 +50,43 @@ function mdTBParser( argText ) {
 			alignText.push(" style='text-align:right'");	// right align
 		else
 			alignText.push("");
-	}
 	// For 1st line
 	retText = "<table>\n";
 	retText +=  "<thead><tr>\n";
 	items = lineText[0].replace(/^\|\s*/, "").replace(/\s*\|$/, "").split(/\s*\|\s*/g);
-	for (let jj = 0; jj < alignText.length; jj++) {
+	for (let jj = 0; jj < alignText.length; jj++)
 		retText +=  "<th"+alignText[jj]+">" + items[jj] + "</th>\n";
-	}
 	// For 3rd and more
 	retText +=  "</tr></thead>\n";
 	retText +=  "<tbody>\n";
 	for (let kk = 2; kk < lineText.length; kk++) {
 		lineText[kk] = lineText[kk].replace(/^\|\s*/, "");
 		items = lineText[kk].split(/\s*\|+\s*/g);
-		var colDivText = lineText[kk].replace(/\s/g, "").match(/\|+/g);
+		let colDivText = lineText[kk].replace(/\s/g, "").match(/\|+/g);
 		retText +=  "<tr>\n";
-		for (let jj = 0; jj < (colDivText||[]).length; jj++) {
+		for (let jj = 0; jj < (colDivText||[]).length; jj++)
 			if (colDivText[jj] == "|")
 				retText +=  "<td"+alignText[jj]+">" + items[jj] + "</td>\n";
 			else
 				retText +=  "<td"+alignText[jj]+" colspan='"+colDivText[jj].length+"'>" + items[jj] + "</td>\n";
-		}
 		retText +=  "</tr>\n";
 	}
 	retText +=  "</tbody></table>";
 	return retText;
 }
 function checkListDepth ( argLine ) {
-	var listType = checkListType ( argLine );
-	var spaceRegex;
-	if (listType == "OL") {
+	let listType = checkListType ( argLine );
+	let spaceRegex;
+	if (listType == "OL")
 		spaceRegex = new RegExp("^\\s*?(?=\\d+\\.\\s+.*?$)");
-	} else {
+	else
 		spaceRegex = new RegExp("^\\s*?(?=[-+*]\\s+.*?$)");
-	}
-	var depth;
-	var spaceText = argLine.match(spaceRegex);
+	let depth;
+	let spaceText = argLine.match(spaceRegex);
 	if (spaceText == null)
 		depth = 0;
-	else {
+	else
 		depth = spaceText[0].length;
-	}
 	return depth;
 }
 function checkListType ( argLine ) {
@@ -98,36 +97,35 @@ function checkListType ( argLine ) {
 		return "OL";
 	else if ( ulRegex.test(argLine) )
 		return "UL";
-	else {
+	else
 		return "RW";
-	}
 }
 function mdListParser ( argText, listType ) {
-	var lines = argText.split(/\n/g);
-	var depth = checkListDepth(lines[0]);
-	var retText = "";
-	var listRegex;
+	let lines = argText.split(/\n/g);
+	let depth = checkListDepth(lines[0]);
+	let retText = "";
+	let listRegex;
 	if (listType == "OL")
 		listRegex = new RegExp("^\\s*?\\d+\\.\\s+(.*?)$");
 	else
 		listRegex = new RegExp("^\\s*?[-+*]\\s+(.*?)$");
 	retText += "<"+listType.toLowerCase()+"><li>";
-	var lineDepth, lineType;
+	let lineDepth, lineType;
 	for (let jj = 0; jj < (lines||[]).length; jj++) {
 		lineDepth = checkListDepth(lines[jj]);
 		lineType = checkListType(lines[jj]);
 		if ( lineDepth == depth && lineType == listType) {	// add new item
 			retText += "</li>\n<li>"+lines[jj].replace(listRegex, "$1");
 			for (let kk = jj+1; kk < (lines||[]).length; kk++) {
-				if ( checkListType(lines[kk]) == "RW" ) {
+				if ( checkListType(lines[kk]) == "RW" )
 					retText += lines[kk]+"\n";
-				} else {
+				else {
 					jj = kk-1;
 					break;
 				}
 			}
 		} else if ( lineDepth >= depth+2 ) {	// create nested list
-			var tempText = "";
+			let tempText = "";
 			for (let kk = jj; kk < (lines||[]).length; kk++) {
 				if ( checkListType(lines[kk]) == "RW" ){
 					tempText += lines[kk]+"\n";
@@ -158,29 +156,28 @@ function mdListParser ( argText, listType ) {
 
 function restore( argText, tag, aftText, regex, restore) {
 	for (let jj = 0; jj < (aftText||[]).length; jj++) {
+		let temp;
 		switch (tag){
-			case "MB":case "CB":case "CM":	// $ is reduced in replace method
-				var temp = aftText[jj].replace( /\$/g, "$$$$").replace( regex, restore );
+			case "MA":case "MB":case "CB":case "CC":case "CM":	// $ is reduced in replace method
+				temp = aftText[jj].replace( /\$/g, "$$$$").replace( regex, restore );
 				argText = argText.replace( delim+tag+delim, temp );
 				break;
 			case "TB":
-				var temp = aftText[jj].replace( regex, restore );
-				argText = argText.replace( delim+tag+delim, mdLineParser( temp, mdTBParser, null ) );
-				// argText = argText.replace( delim+tag+delim, mdTBParser(temp) );	// without md parse in table
+				temp = aftText[jj].replace( regex, restore );
+				argText = argText.replace( delim+tag+delim, mdInlineParser( temp, mdTBParser, null ) );
 				break;
 			case "UL":case "OL":
-				var temp = aftText[jj].replace( regex, restore );
-				argText = argText.replace( delim+tag+delim, mdLineParser( temp, mdListParser, tag ) );
-				// argText = argText.replace( delim+tag+delim, mdListParser(temp, tag) );	// without md parse in list
+				temp = aftText[jj].replace( regex, restore );
+				argText = argText.replace( delim+tag+delim, mdInlineParser( temp, mdListParser, tag ) );
 				break;
 			default:
 				if (/H\d/.test(tag)) {
-					var temp = aftText[jj].replace(/'/g, "").replace( regex, restore );
-					temp = mdLineParser(temp, null, null);
+					temp = aftText[jj].replace(/'/g, "").replace( regex, restore );
+					temp = mdInlineParser(temp, null, null);
 					argText = argText.replace( delim+tag+delim, temp );
 				} else {
-					var temp = aftText[jj].replace( regex, restore );
-					temp = mdLineParser(temp, null, null);
+					temp = aftText[jj].replace( regex, restore );
+					temp = mdInlineParser(temp, null, null);
 					argText = argText.replace( delim+tag+delim, temp );
 				}
 				break;
@@ -190,25 +187,34 @@ function restore( argText, tag, aftText, regex, restore) {
 }
 
 function mdp( argText ) {
-	// settings
+	// pre-formatting
 	argText = argText.replace(/\r\n?/g, "\n");	// Commonize line break codes between Win and mac.
+	argText = argText.replace(/\t/g, tabTo);
 	argText = "\n"+ argText + "\n\n";
 
-	var regexArray = new Array();
-	var tagArray = new Array();
-	var stringArray = new Array();
-	var restoreArray = new Array();
-	var resRegexArray = new Array();
-	tagArray.push("CB");
+	// Making lists for structure analysis
+	let regexArray = new Array();
+	let tagArray = new Array();
+	let restoreArray = new Array();
+	let resRegexArray = new Array();
+	tagArray.push("CB");	// Code block with code name
 	regexArray.push( new RegExp("\\n\\`\\`\\`.+?\\n[\\s\\S]*?\\n\\`\\`\\`(?=\\n)", 'g') );
-	restoreArray.push( "<pre><code class='language-$1'>$2</code></pre>" );
+	restoreArray.push( "<pre><code class='"+codeLangPrefix+"$1'>$2</code></pre>" );
 	resRegexArray.push( new RegExp("^\\n*\\`\\`\\`(.+?)\\n([\\s\\S]*)\\n\\`\\`\\`\\n*$") );
-	tagArray.push("CM");
+	tagArray.push("CC");	// Code block without code name
+	regexArray.push( new RegExp("\\n\\`\\`\\`\\n[\\s\\S]*?\\n\\`\\`\\`(?=\\n)", 'g') );
+	restoreArray.push( "<pre><code>$1</code></pre>" );
+	resRegexArray.push( new RegExp("^\\n*\\`\\`\\`\\n([\\s\\S]*)\\n\\`\\`\\`\\n*$") );
+	tagArray.push("CM");	// HTML comment block
 	regexArray.push( new RegExp("\\n<!--[\\s\\S]*?-->(?=\\n)", 'g') );
 	restoreArray.push( "$1" );
 	resRegexArray.push( new RegExp("^\\n*(<!--[\\s\\S]*?-->)\\n*$") );
-	tagArray.push("MB");
-	regexArray.push( new RegExp("\\n\\${2}\\n[\\s\\S]+?\\n\\${2}(?=\\n)", 'g') );
+	tagArray.push("MA");	// Math block
+	regexArray.push( new RegExp("\\n"+mathDelim1[0]+"\\n[\\s\\S]+?\\n"+mathDelim1[1]+"(?=\\n)", 'g') );
+	restoreArray.push( "$1" );
+	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
+	tagArray.push("MB");	// Math block
+	regexArray.push( new RegExp("\\n"+mathDelim2[0]+"\\n[\\s\\S]+?\\n"+mathDelim2[1]+"(?=\\n)", 'g') );
 	restoreArray.push( "$1" );
 	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
 
@@ -236,11 +242,12 @@ function mdp( argText ) {
 	restoreArray.push( "<hr>" );
 	resRegexArray.push( new RegExp("^\\n*[\\s\\S]*\\n*$") );
 	tagArray.push("PP");
-	regexArray.push( new RegExp("\\n[^&\\n][\\s\\S]*?(?=\\n\\n)", 'g') );
+	regexArray.push( new RegExp("\\n[^"+delim[0]+"\\n][\\s\\S]*?(?=\\n\\n)", 'g') );
 	restoreArray.push( "<p>$1</p>" );
 	resRegexArray.push( new RegExp("^\\n*([\\s\\S]*)\\n*$") );
 
-	// Convert Structure Notation
+	// Convert to Structure Notation
+	let stringArray = new Array();
 	for (let ii = 0; ii < tagArray.length; ii++) {
 		stringArray.push( argText.match(regexArray[ii]) );
 		argText = argText.replace( regexArray[ii], "\n\n"+delim+tagArray[ii]+delim+"\n\n" );
@@ -251,6 +258,6 @@ function mdp( argText ) {
 	for (let ii = 0; ii < tagArray.length; ii++) {
 		argText = restore( argText, tagArray[ii], stringArray[ii], resRegexArray[ii], restoreArray[ii]);
 	}
-	// argText = argText.replace(/\n{2,}/g, "\n");
+
 	return argText;
 }
