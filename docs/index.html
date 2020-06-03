@@ -3,17 +3,38 @@
 <head>
   <meta charset="utf-8"/>
   <title>MarkdownParser</title>
-  <link rel="shortcut icon" type="image/x-icon" href="https://umemotoctrl.github.io/MarkdownParser/img/favicon.ico" />
+  <link rel="shortcut icon" type="image/x-icon" href="https://umemotoctrl.github.io/img/favicon.ico" />
   <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/onlineTest.css" />
-  <!-- JQuery -->
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-  <!-- Original -->
-  <script type="text/javascript" src="js/mdp.js"></script>
-  <script type="text/javascript" src="js/onlineTest.js"></script>
-  <!-- MathJax -->
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.min.css">
+  <style type="text/css">
+body {
+  max-width: 1200px;
+}
+div#article {
+  width: 54%;
+  height: fit-content;
+  float: left;
+}
+textarea#mdinput {
+  margin-right: 1%;
+  width: 45%;
+  height: 800px;
+  float: left;
+  resize: none;
+}
+div#TopMenu {
+  float: right;
+  display: flex;
+}
+form#selecter {
+  margin-left: 15px;
+}
+  </style>
+  <!-- Marked -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/marked/1.0.0/marked.min.js" defer></script>
+  <!-- Original JS -->
+  <script type="text/javascript" src="js/mdp.js" defer></script>
+  <script type="text/javascript" src="js/onlineTest.js" defer></script>
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166116914-2"></script>
   <script>
@@ -24,19 +45,22 @@
   </script>
 </head>
 
-<body><div id="bodywrap">
-<div id="TopMenu"><ul><li><a href="https://github.com/UmemotoCtrl/MarkdownParser">GitHub</a></li></ul></div>
-<div id="Main">
+<body>
+  <div id="TopMenu">
+    <p><b><a href="https://github.com/UmemotoCtrl/MarkdownParser">Go GitHub Repo</a></b></p>
+    <form id="selecter">
+      <h3>Parser Selection</h3>
+      <input type="radio" name="parser" value="mdp" checked>mdp
+      <input type="radio" name="parser" value="marked">marked
+    </form>
+  </div>
   <h1>MarkdownParser Online Example</h1>
   <textarea id="mdinput" type="text">Input</textarea>
-  <!-- <div id="Center"><div id="article"></div></div> -->
-  <div id="Center">
   <div id="article"></div>
-  </div>
-</div>
-<pre><code id="raw"></code></pre>
-<hr>
-<p>JQuery with JavaScript and MathJax are used to display this page. You can view it with a compatible browser.</p>
-<p>Copyright (c) 2020 Kazuki Umemoto</p>
-</div></body>
+  <h2>Parsed HTML</h2>
+  <pre><code id="raw"></code></pre>
+  <hr>
+  <p> MDP, Marked and MathJax are used to display this page. You can view it with a compatible browser.</p>
+  <p>Copyright (c) 2020 Kazuki Umemoto</p>
+</body>
 </html>

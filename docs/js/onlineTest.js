@@ -1,50 +1,55 @@
 // for MathJax
-window.MathJax = {
-	tex: {
+(function () {
+	window.MathJax = {
+		tex: {
 		inlineMath: [['$', '$'], ['\\(', '\\)']]
-	}
-};
+		},
+		svg: {
+		fontCache: 'global'
+		}
+	};
+	var scriptIE = document.createElement("script");
+	scriptIE.src  = "https://polyfill.io/v3/polyfill.min.js?features=es6";
+	document.getElementsByTagName("head")[0].appendChild(scriptIE);
+	var script = document.createElement("script");
+	script.type = "text/javascript";
+	script.src  = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js";
+	document.getElementsByTagName("head")[0].appendChild(script);
+	script.onload = (function () {
+		// console.log(MathJax);
+	})();
+})();
 
-$(function() {
-	if (location.search=="") {
-		$data = "# MarkdownParser\n\n## Markdown Notation\n\n### Subsection\n\n### List\n\nComment\n```markdown\n* 1st\n  - Item 1-1\n  - Item 1-2\n    1. a\n    2. b\n    3. c\n* 2nd\n\n1. 1st\nSentence w/o inserted blank line.\n  1. 1-1\n  1. 1-2\n  1. 1-3\n1. 2nd\nSentence w/o inserted blank line.\n  - Item 1-1\n  - Item 1-1\n  - Item 1-2\n1. 3rd\nSentence w/o inserted blank line.\n```\n\nis displayed as\n\n* 1st\n  - Item 1-1\n  - Item 1-2\n    1. a\n    2. b\n    3. c\n* 2nd\n\n1. 1st\nSentence w/o inserted blank line.\n  1. 1-1\n  1. 1-2\n  1. 1-3\n1. 2nd\nSentence w/o inserted blank line.\n  - Item 1-1\n  - Item 1-1\n  - Item 1-2\n1. 3rd\nSentence w/o inserted blank line.\n\n### EM: `*`, Strong: `**`, and Strike: `~~`\n\n*abc*, **xyz**, ~~strike~~.\n\n### Codes\n\nInline code is `code`.\n\n```markdown\n ```Python\nprint('hoge')\nprint('hoge')\nprint('hoge')\nprint('hoge')\n ```\n```\n\nis displayed as follows:\n\n```Python\nprint('hoge')\nprint('hoge')\nprint('hoge')\nprint('hoge')\n```\n\n### Anchor and Image\n\n[GitHub](https://github.com/UmemotoCtrl/MarkdownParser)\n`![alternative word](url)`\n\n### Table\n\n```markdown\n| A | B |\n| :---:  | ---:  |\n| $\\alpha$ | $\\beta$ |\n| aaaaa | bbbbb |\n```\n\n| A | B |\n| :---:  | ---:  |\n| $\\alpha$ | $\\beta$ |\n| aaaaa | bbbbb |\n\n### Horizontal Line\n\n`---`\n\n---\n\n### Math Formula\n\nInline math $x \\in X$.\n\n$$\n\\tag{1} y = f_1(x) = \\dfrac{\\partial y}{\\partial x}\n$$\n\n$$\n\\tag{*} f(x) :=\\begin{cases}1,\\quad &\\mbox{if}~ x\\neq 0 \\\\ 0,\\quad &\\mbox{if}~ x = 0\\end{cases}\n$$\n\n";
-		$("textarea#mdinput").val( $data );
-		// $("#article").html( $data );
-		$("#article").html( mdp($data) );
-		$("#raw").html( mdp($data).replace(/</g,'&lt;').replace(/>/g,'&gt;') );
-		try {
-			MathJax.typeset();
-		} catch (e) {
-		}
+var mdinput;
+var article;
+var raw;
+var selecter;
+var radioList;
+
+let writeHTML = function () {
+	var htmlTxt
+	if ( radioNodeList.value == "mdp" ) {
+		htmlTxt = mdp(mdinput.value);
 	} else {
-		$strs = location.search.split("?id=")[1].split(":");
-		$file = "./md";
-		for (let i = 0; i < $strs.length; i++) {
-			$file = $file + "/" + $strs[i];
-		}
-		$file = $file + ".md";
-		$.ajax({
-			url: $file,
-			success: function($data) {
-				$("textarea#mdinput").val( $data );
-				$("#article").html( mdp($data) );
-				$("#raw").html( mdp($data).replace(/</g,'&lt;').replace(/>/g,'&gt;') );
-				try {
-					MathJax.typeset();
-				} catch (e) {
-				}
-			}
-		});
+		htmlTxt = marked(mdinput.value);
 	}
-	
-	$("textarea#mdinput").on('input', function() {
-		// console.log("input event");
-		$("#article").html( mdp($("textarea#mdinput").val()) );
-		$("#raw").html( mdp($("textarea#mdinput").val()).replace(/</g,'&lt;').replace(/>/g,'&gt;') );
-		// for MathJax
-		try {
-			MathJax.typeset();
-		} catch (e) {
-		}
-	});
-});
+	article.innerHTML = htmlTxt;
+	raw.innerHTML = htmlTxt.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+	if ( MathJax.typesetPromise )
+		MathJax.typesetPromise();
+	console.log ( mdinput.value.replace(/\\/g,'\\\\').replace(/\n/g,'\\n') );
+}
+
+window.onload = function() {
+	var data = "# Comparison mdp and Marked\n\nThis is demo for mdp. For detail information, see [GitHub Repo](https://github.com/UmemotoCtrl/MarkdownParser).\n\n**You can change Markdown parser.**\n\n## Inline notation\n\n1. *em*\n1. **strong**\n1. ~~strike~~\n1. `code`\n1. [Anchor link to GitHub Repo](https://github.com/UmemotoCtrl/MarkdownParser)\n1. Inline math $\\dot{x} = f(x)$\n\n## Block notation\n\n### Table\n\n| A | B |\n| :---:  | ---:  |\n| $|\\alpha |$ | $|\\beta |$ |\n| a-----a | b-----b |\n\n### Math formula in independent line\n\n\\[\n\\tag{1} \\dfrac{\\partial y}{\\partial x} = x\n\\]\n\n$$\n\\tag{2} f(x) :=\\begin{cases}1,\\quad &\\mbox{if}~ x\\neq 0 \\\\ 0,\\quad &\\mbox{if}~ x = 0\\end{cases}\n$$\n\n### List\n\n* a\n* b\n  1. A\n  1. B\n\n### Code block\n\n```markdown\n* a\n* b\n  1. A\n  1. B\n```\n\n### Horizontal rule\n\n---\n\n### Comment block\n\n<!--\nThis is not shown.\n-->\n\n";
+	mdinput = document.getElementById("mdinput");
+	article = document.getElementById("article");
+	raw     = document.getElementById("raw");
+	selecter= document.getElementById("selecter") ;
+	radioNodeList = selecter.parser;
+
+	mdinput.value = data;
+	writeHTML();
+	mdinput.oninput = writeHTML;
+	selecter.onchange = writeHTML;
+};

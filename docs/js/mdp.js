@@ -1,3 +1,9 @@
+//
+// MIT License
+// Copyright (c) 2020 Kazuki UMEMOTO
+// see https://github.com/UmemotoCtrl/MarkdownParser/blob/master/LICENSE for details
+//
+
 const delim = "&&";		// delimiter for structure expression
 const mathDelim1 = new Array("\\${2}", "\\${2}");	// in Regex form, = "$$ ... $$"
 const mathDelim2 = new Array("\\\\\[", "\\\\\]");	// in Regex form, altanative, = "\[ ... \]"
