@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>MarkdownParser</title>
+  <title>Comparison Javascript Markdown Parsers</title>
   <link rel="shortcut icon" type="image/x-icon" href="https://umemotoctrl.github.io/img/favicon.ico" />
   <!-- CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.min.css">
@@ -30,8 +30,13 @@ form#selector {
   margin-left: 15px;
 }
   </style>
+  <!-- markdown-it -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/11.0.0/markdown-it.min.js" integrity="sha256-3mv+NUxFuBg26MtcnuN2X37WUxuGunWCCiG2YCSBjNc=" crossorigin="anonymous" defer></script>
+  <!-- Showdown -->
+  <script src="https://cdn.jsdelivr.net/npm/showdown@1.9.1/dist/showdown.min.js" defer></script>
   <!-- Marked -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/1.0.0/marked.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/1.0.0/marked.min.js" defer></script> -->
   <!-- Original JS -->
   <script src="js/mdp.js" defer></script>
   <script src="js/onlineTest.js" defer></script>
@@ -51,10 +56,12 @@ form#selector {
     <form id="selector">
       <h3>Parser Selection</h3>
       <input type="radio" name="parser" value="mdp" checked>mdp
+      <input type="radio" name="parser" value="markdown-it">markdown-it
+      <input type="radio" name="parser" value="showdown">showdown
       <input type="radio" name="parser" value="marked">marked
     </form>
   </div>
-  <h1>MarkdownParser Online Example</h1>
+  <h1>Comparison Javascript Markdown Parsers</h1>
   <textarea id="mdInput">Input</textarea>
   <div id="article"></div>
   <h2>Parsed HTML</h2>
