@@ -4,9 +4,9 @@
 // see https://github.com/UmemotoCtrl/MarkdownParser/blob/master/LICENSE for details
 //
 
-const delim = "&&";		// delimiter for structure expression
-const mathDelim1 = new Array("\\${2}", "\\${2}");	// in Regex form, = "$$ ... $$"
-const mathDelim2 = new Array("\\\\\[", "\\\\\]");	// in Regex form, altanative, = "\[ ... \]"
+const delimiter = "&&";		// delimiter for structure expression
+const mathDelimiter1 = new Array("\\${2}", "\\${2}");	// in Regex form, = "$$ ... $$"
+const mathDelimiter2 = new Array("\\\\\[", "\\\\\]");	// in Regex form, alternative, = "\[ ... \]"
 const tabTo = "  ";			// \t -> two spaces
 const codeLangPrefix = "language-";		// ```clang -> <code class="language-clang">
 
@@ -15,15 +15,15 @@ function mdp( argText ) {
 		// Evacuating comments and formulas --
 		let evacuatedText;
 		evacuatedText = argText.match(  /`(.+?)`/g );
-		argText       = argText.replace(/`(.+?)`/g, delim+delim+"IC"+delim+delim);
+		argText       = argText.replace(/`(.+?)`/g, delimiter+delimiter+"IC"+delimiter+delimiter);
 		let evacuatedMath;
 		evacuatedMath = argText.match(  /\$(.+?)\$/g );
-		argText       = argText.replace(/\$(.+?)\$/g, delim+delim+"IM"+delim+delim);
+		argText       = argText.replace(/\$(.+?)\$/g, delimiter+delimiter+"IM"+delimiter+delimiter);
 		// -- Evacuating comments and formulas
-		argText = argText.replace(/\[(.+?)\]\((.+?)\)/g, "<a href='$2'>$1</a>");	// Anchor Link
-		argText = argText.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");	// Strong
-		argText = argText.replace(/~~(.+?)~~/g, "<strike>$1</strike>");	// Strike
-		argText = argText.replace(/\*(.+?)\*/g, "<em>$1</em>");	// Emphasize
+		argText = argText.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');	// Anchor Link
+		argText = argText.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');	// Strong
+		argText = argText.replace(/~~(.+?)~~/g, '<strike>$1</strike>');	// Strike
+		argText = argText.replace(/\*(.+?)\*/g, '<em>$1</em>');	// Emphasize
 	
 		if (argFunc != null && listType != null)
 			argText = argFunc(argText, listType);
@@ -31,13 +31,11 @@ function mdp( argText ) {
 			argText = argFunc(argText);
 		
 		// Restoring comments and formulas --
-		if (evacuatedMath != null)
-			for (let ii = 0; ii < evacuatedMath.length; ii++)
-				argText = argText.replace(delim+delim+"IM"+delim+delim, evacuatedMath[ii]);
-		if (evacuatedText != null)
-			for (let ii = 0; ii < evacuatedText.length; ii++)	// $ is reduced in replace method
-				argText = argText.replace(delim+delim+"IC"+delim+delim,
-					"<code>"+ evacuatedText[ii].replace( /\$/g, "$$$$$$").replace(/`/g,"").replace(/</g,'&lt;').replace(/>/g,'&gt;') +"</code>");
+		for (let ii = 0; ii < (evacuatedMath||[]).length; ii++)
+			argText = argText.replace(delimiter+delimiter+"IM"+delimiter+delimiter, evacuatedMath[ii]);
+		for (let ii = 0; ii < (evacuatedText||[]).length; ii++)	// $ is reduced in replace method
+			argText = argText.replace(delimiter+delimiter+"IC"+delimiter+delimiter,
+				"<code>"+ evacuatedText[ii].replace( /\$/g, "$$$$$$").replace(/`/g,"").replace(/</g,'&lt;').replace(/>/g,'&gt;') +"</code>");
 		// -- Restoring comments and formulas
 		return argText;
 	}
@@ -166,9 +164,9 @@ function mdp( argText ) {
 			"tag": "CB",
 			"matchRegex": new RegExp("\\n\\`\\`\\`.+?\\n[\\s\\S]*?\\n\\`\\`\\`(?=\\n)", 'g'),
 			"converter": function ( argBlock ) {
-				return argBlock.replace( /\$/g, "$$$$").replace(	// $ will be reduced in replace mathod
+				return argBlock.replace( /\$/g, "$$$$").replace(	// $ will be reduced in replace method
 					new RegExp("^\\n*\\`\\`\\`(.+?)\\n([\\s\\S]*)\\n\\`\\`\\`\\n*$"),
-					"<pre><code class='"+codeLangPrefix+"$1'>$2</code></pre>"
+					'<pre><code class="'+codeLangPrefix+'$1">$2</code></pre>'
 				);
 			},
 			"convertedHTML": new Array()
@@ -195,7 +193,7 @@ function mdp( argText ) {
 		});
 		cAr.push ( {	// Math block - 1
 			"tag": "MA",
-			"matchRegex": new RegExp("\\n"+mathDelim1[0]+"\\n[\\s\\S]+?\\n"+mathDelim1[1]+"(?=\\n)", 'g'),
+			"matchRegex": new RegExp("\\n"+mathDelimiter1[0]+"\\n[\\s\\S]+?\\n"+mathDelimiter1[1]+"(?=\\n)", 'g'),
 			"converter": function ( argBlock ) {
 				return argBlock.replace( /\$/g, "$$$$").replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
 			},
@@ -203,7 +201,7 @@ function mdp( argText ) {
 		});
 		cAr.push ( {	// Math block - 2
 			"tag": "MB",
-			"matchRegex": new RegExp("\\n"+mathDelim2[0]+"\\n[\\s\\S]+?\\n"+mathDelim2[1]+"(?=\\n)", 'g'),
+			"matchRegex": new RegExp("\\n"+mathDelimiter2[0]+"\\n[\\s\\S]+?\\n"+mathDelimiter2[1]+"(?=\\n)", 'g'),
 			"converter": function ( argBlock ) {
 				return argBlock.replace( /\$/g, "$$$$").replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
 			},
@@ -214,8 +212,8 @@ function mdp( argText ) {
 				"tag": "H"+jj,
 				"matchRegex": new RegExp("\\n#{"+jj+"}\\s+.*?(?=\\n)", 'g'),
 				"converter": function ( argBlock ) {
-					var temp = argBlock.replace(/'/g, "")
-						.replace( new RegExp("^\\n*#{"+jj+"}\\s+(.*?)\\n*$"), "<h"+jj+" class='$1'>$1</h"+jj+">" );
+					var temp = argBlock.replace(/"/g, '')
+						.replace( new RegExp('^\\n*#{'+jj+'}\\s+(.*?)\\n*$'), '<h'+jj+' id="$1">$1</h'+jj+'>' );
 					return mdInlineParser(temp, null, null);
 				},
 				"convertedHTML": new Array()
@@ -261,7 +259,7 @@ function mdp( argText ) {
 		});
 		cAr.push ( {	// Paragraph
 			"tag": "PP",
-			"matchRegex": new RegExp("\\n[^"+delim[0]+"\\n][\\s\\S]*?(?=\\n\\n)", 'g'),
+			"matchRegex": new RegExp("\\n[^"+delimiter[0]+"\\n][\\s\\S]*?(?=\\n\\n)", 'g'),
 			"converter": function ( argBlock ) {
 				var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "<p>$1</p>" );
@@ -286,7 +284,7 @@ function mdp( argText ) {
 		for (let jj = 0; jj < (cAr[ii]["convertedHTML"]||[]).length; jj++) {
 			cAr[ii]["convertedHTML"][jj] = cAr[ii]["converter"](cAr[ii]["convertedHTML"][jj]);
 		}
-		argText = argText.replace( cAr[ii]["matchRegex"], "\n\n"+delim+cAr[ii]["tag"]+delim+"\n\n" );
+		argText = argText.replace( cAr[ii]["matchRegex"], "\n\n"+delimiter+cAr[ii]["tag"]+delimiter+"\n\n" );
 	}
 	argText = argText.replace(/\n{2,}/g, "\n");
 	// console.log(argText);	// to see structure
@@ -294,7 +292,7 @@ function mdp( argText ) {
 	// Restore to html
 	for (let ii = 0; ii < (cAr||[]).length; ii++) {
 		for (let jj = 0; jj < (cAr[ii]["convertedHTML"]||[]).length; jj++) {
-			argText = argText.replace( delim+cAr[ii]["tag"]+delim, cAr[ii]["convertedHTML"][jj] );
+			argText = argText.replace( delimiter+cAr[ii]["tag"]+delimiter, cAr[ii]["convertedHTML"][jj] );
 		}
 	}
 	return argText;
