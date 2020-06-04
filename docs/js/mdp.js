@@ -119,10 +119,10 @@ function mdp( argText ) {
 			lineDepth = checkListDepth(lines[jj]);
 			lineType = checkListType(lines[jj]);
 			if ( lineDepth == depth && lineType == listType) {	// add new item
-				retText += "</li>\n<li>"+lines[jj].replace(listRegex, "$1");
+				retText += "</li>\n<li>"+lines[jj].replace(listRegex, "$1") + "\n";
 				for (let kk = jj+1; kk < (lines||[]).length; kk++) {
 					if ( checkListType(lines[kk]) == "RW" )
-						retText += lines[kk]+"\n";
+						retText += lines[kk].replace( /\$/g, "$$$$")+"\n";
 					else {
 						jj = kk-1;
 						break;
@@ -182,15 +182,6 @@ function mdp( argText ) {
 			},
 			"convertedHTML": new Array()
 		});
-		cAr.push ( {	// HTML comment block
-			"tag": "CM",
-			"matchRegex": new RegExp("\\n<!--[\\s\\S]*?-->(?=\\n)", 'g'),
-			"converter": function ( argBlock ) {
-				return argBlock.replace( /\$/g, "$$$$")
-					.replace( new RegExp("^\\n*(<!--[\\s\\S]*?-->)\\n*$"), "$1" );
-			},
-			"convertedHTML": new Array()
-		});
 		cAr.push ( {	// Math block - 1
 			"tag": "MA",
 			"matchRegex": new RegExp("\\n"+mathDelimiter1[0]+"\\n[\\s\\S]+?\\n"+mathDelimiter1[1]+"(?=\\n)", 'g'),
@@ -207,18 +198,15 @@ function mdp( argText ) {
 			},
 			"convertedHTML": new Array()
 		});
-		for (let jj = 1; jj < 5; jj++) {
-			cAr.push ( {	// Header
-				"tag": "H"+jj,
-				"matchRegex": new RegExp("\\n#{"+jj+"}\\s+.*?(?=\\n)", 'g'),
-				"converter": function ( argBlock ) {
-					var temp = argBlock.replace(/"/g, '')
-						.replace( new RegExp('^\\n*#{'+jj+'}\\s+(.*?)\\n*$'), '<h'+jj+' id="$1">$1</h'+jj+'>' );
-					return mdInlineParser(temp, null, null);
-				},
-				"convertedHTML": new Array()
-			});
-		}
+		cAr.push ( {	// HTML comment block
+			"tag": "CM",
+			"matchRegex": new RegExp("\\n<!--[\\s\\S]*?-->(?=\\n)", 'g'),
+			"converter": function ( argBlock ) {
+				return argBlock.replace( /\$/g, "$$$$")
+					.replace( new RegExp("^\\n*(<!--[\\s\\S]*?-->)\\n*$"), "$1" );
+			},
+			"convertedHTML": new Array()
+		});
 		cAr.push ( {	// Table
 			"tag": "TB",
 			"matchRegex": new RegExp("\\n\\n\\|.+?\\|\\s*?\\n\\|[-:|\\s]*?\\|\\s*?\\n\\|.+?\\|[\\s\\S]*?(?=\\n\\n)", 'g'),
@@ -249,6 +237,18 @@ function mdp( argText ) {
 			},
 			"convertedHTML": new Array()
 		});
+		for (let jj = 1; jj < 5; jj++) {
+			cAr.push ( {	// Header
+				"tag": "H"+jj,
+				"matchRegex": new RegExp("\\n#{"+jj+"}\\s+.*?(?=\\n)", 'g'),
+				"converter": function ( argBlock ) {
+					var temp = argBlock.replace(/"/g, '')
+						.replace( new RegExp('^\\n*#{'+jj+'}\\s+(.*?)\\n*$'), '<h'+jj+' id="$1">$1</h'+jj+'>' );
+					return mdInlineParser(temp, null, null);
+				},
+				"convertedHTML": new Array()
+			});
+		}
 		cAr.push ( {	// Horizontal Rule
 			"tag": "HR",
 			"matchRegex": new RegExp("\\n\\s*?-{3,}\\s*(?=\\n)", 'g'),
@@ -284,13 +284,13 @@ function mdp( argText ) {
 		for (let jj = 0; jj < (cAr[ii]["convertedHTML"]||[]).length; jj++) {
 			cAr[ii]["convertedHTML"][jj] = cAr[ii]["converter"](cAr[ii]["convertedHTML"][jj]);
 		}
-		argText = argText.replace( cAr[ii]["matchRegex"], "\n\n"+delimiter+cAr[ii]["tag"]+delimiter+"\n\n" );
+		argText = argText.replace( cAr[ii]["matchRegex"], "\n"+delimiter+cAr[ii]["tag"]+delimiter );
 	}
 	argText = argText.replace(/\n{2,}/g, "\n");
 	// console.log(argText);	// to see structure
 
 	// Restore to html
-	for (let ii = 0; ii < (cAr||[]).length; ii++) {
+	for (let ii = (cAr||[]).length-1; ii >= 0; ii--) {
 		for (let jj = 0; jj < (cAr[ii]["convertedHTML"]||[]).length; jj++) {
 			argText = argText.replace( delimiter+cAr[ii]["tag"]+delimiter, cAr[ii]["convertedHTML"][jj] );
 		}
