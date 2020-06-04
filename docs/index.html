@@ -1,12 +1,12 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="utf-8">
   <title>MarkdownParser</title>
   <link rel="shortcut icon" type="image/x-icon" href="https://umemotoctrl.github.io/img/favicon.ico" />
   <!-- CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.min.css">
-  <style type="text/css">
+  <style>
 body {
   max-width: 1200px;
 }
@@ -15,7 +15,7 @@ div#article {
   height: fit-content;
   float: left;
 }
-textarea#mdinput {
+textarea#mdInput {
   margin-right: 1%;
   width: 45%;
   height: 800px;
@@ -26,15 +26,15 @@ div#TopMenu {
   float: right;
   display: flex;
 }
-form#selecter {
+form#selector {
   margin-left: 15px;
 }
   </style>
   <!-- Marked -->
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/marked/1.0.0/marked.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/1.0.0/marked.min.js" defer></script>
   <!-- Original JS -->
-  <script type="text/javascript" src="js/mdp.js" defer></script>
-  <script type="text/javascript" src="js/onlineTest.js" defer></script>
+  <script src="js/mdp.js" defer></script>
+  <script src="js/onlineTest.js" defer></script>
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166116914-2"></script>
   <script>
@@ -48,14 +48,14 @@ form#selecter {
 <body>
   <div id="TopMenu">
     <p><b><a href="https://github.com/UmemotoCtrl/MarkdownParser">Go GitHub Repo</a></b></p>
-    <form id="selecter">
+    <form id="selector">
       <h3>Parser Selection</h3>
       <input type="radio" name="parser" value="mdp" checked>mdp
       <input type="radio" name="parser" value="marked">marked
     </form>
   </div>
   <h1>MarkdownParser Online Example</h1>
-  <textarea id="mdinput" type="text">Input</textarea>
+  <textarea id="mdInput">Input</textarea>
   <div id="article"></div>
   <h2>Parsed HTML</h2>
   <pre><code id="raw"></code></pre>
