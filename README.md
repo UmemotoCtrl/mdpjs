@@ -1,7 +1,7 @@
 # MarkdownParser
 A somewhat functional JavaScript Markdown parser, strong in formulas [Web Site](https://umemotoctrl.github.io/MarkdownParser/).
 
-This script aims to use in Client-side and was made for Marked's alternative because Marked does not well work with math formulas.
+This script aims to use in Client-side and was made for Marked's alternative because Marked does not work well with math formulas.
 
 ## Usage
 
