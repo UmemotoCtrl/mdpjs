@@ -5,7 +5,7 @@ This script aims to use in Client-side and was made for Marked's alternative bec
 
 ## Usage
 
-Download [mdp.js v1.0](https://github.com/UmemotoCtrl/MarkdownParser/releases/download/v1.0/mdp.js), and add to header 
+Download [mdp.js](https://github.com/UmemotoCtrl/MarkdownParser/blob/master/docs/js/mdp.js), and add to header 
 
 ```html
 <script type="text/javascript" src="js/mdp.js"></script>
