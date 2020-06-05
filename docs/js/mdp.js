@@ -9,7 +9,12 @@
 // 
 // var mdp = makeMDP();
 // var html_text = mdp.render( markdown_test );
-// mdp.addBlockSyntax ({	// Horizontal Rule
+// 
+// ============
+// CHANGE SYNTAX
+// ============
+// 
+// mdp.addBlockSyntax ({	// this is sample for Horizontal Rule
 // 		tag: "HR",
 // 		priority: 35,
 // 		provisionalText: "\n\n"+mdp.config.delimiter+"HR"+mdp.config.delimiter+"\n",	// should include delimiter+tag+delimiter
@@ -19,9 +24,29 @@
 // 		},
 // 		convertedHTML: new Array()
 // });
+// mdp.addInlineSyntax ({	// this is sample for img
+// 	tag: "IG",
+// 	priority: 60,
+// 	provisionalText: '<img url="$2" alt="$1"></img>',
+// 	matchRegex: new RegExp("!\\[(.+?)\\]\\((.+?)\\)", 'g'),
+// 	converter: function ( argBlock ) {
+// 		return null;
+// 	},
+// 	convertedHTML: new Array()
+// });
+// mdp.addBlockSyntax ({	// this is sample for Setext headings
+// 		tag: "SH",
+// 		priority: 60,
+// 		provisionalText: "\n"+mdp.config.delimiter+"SH"+mdp.config.delimiter+"\n",	// should include delimiter+tag+delimiter
+// 		matchRegex: new RegExp("\\n.+\\n *=+[ =]*=+ *(?=\\n)", 'g'),
+// 		converter: function ( argBlock ) {
+// 			var temp = argBlock.replace(/"/g, '')
+// 			.replace( new RegExp('^\\n*(.+)\\n *=+[ =]*=+ *'), '<h1 id="$1">$1</h1>' );
+// 			return mdp.mdInlineParser(temp, null, null);
+// 		},
+// 		convertedHTML: new Array()
+// });
 // mdp.removeBlockSyntax("H1");
-// mdp.removeBlockSyntax("OL");
-// mdp.removeBlockSyntax("UL");
 
 let makeMDP = function () {
 	let makeBlockSyntax = function (argObj) {
@@ -83,7 +108,7 @@ let makeMDP = function () {
 		cAr.push ( {	// Horizontal Rule
 			tag: "HR",
 			priority: 50,
-			provisionalText: "\n\n"+delimiter+"HR"+delimiter+"\n",
+			provisionalText: "\n\n"+delimiter+"HR"+delimiter+"\n",	// to divide list, \n is added.
 			matchRegex: new RegExp("\\n *[-+*=] *[-+*=] *[-+*=][-+*= ]*(?=\\n)", 'g'),
 			converter: function ( argBlock ) {
 				return "<hr>";
@@ -168,6 +193,66 @@ let makeMDP = function () {
 		});
 		return cAr;
 	}
+	let makeInlineSyntax = function (argObj) {
+		const delimiter = argObj.config.delimiter;
+		let cAr = new Array();
+		cAr.push ({	// inline code
+			tag: "IC",
+			priority: 100,
+			provisionalText: delimiter+delimiter+"IC"+delimiter+delimiter,
+			// should include delimiter+tag+delimiter
+			matchRegex: new RegExp("`.+?`", 'g'),
+			converter: function ( argBlock ) {
+				return "<code>"+ argBlock.replace( /\$/g, "$$$$$$").replace(/`(.+?)`/g,"$1").replace(/</g,'&lt;').replace(/>/g,'&gt;') +"</code>";
+			},
+			convertedHTML: new Array()
+		});
+		cAr.push ({	// inline math
+			tag: "IM",
+			priority: 90,
+			provisionalText: delimiter+delimiter+"IM"+delimiter+delimiter,
+			matchRegex: new RegExp("\\$.+?\\$", 'g'),
+			converter: function ( argBlock ) {
+				return argBlock;
+			},
+			convertedHTML: new Array()
+		});
+
+		cAr.push ({	// Anchor Link
+			tag: "AC",	// Just for use array management.
+			priority: 50,
+			provisionalText: '<a href="$2">$1</a>',					// the string is used for replace.
+			matchRegex: new RegExp("\\[(.+?)\\]\\((.+?)\\)", 'g'),	// the RexExp is used for replace.
+			converter: function ( argBlock ) {return null;},
+			convertedHTML: new Array()
+		});
+		cAr.push ({		// Strong
+			tag: "SO",	// Just for use array management.
+			priority: 40,
+			provisionalText: '<strong>$1</strong>',
+			matchRegex: new RegExp("\\*\\*(.+?)\\*\\*", 'g'),
+			converter: function ( argBlock ) {return null;},
+			convertedHTML: new Array()
+		});
+		cAr.push ({	// Emphasize
+			tag: "EM",	// Just for use array management.
+			priority: 30,
+			provisionalText: '<em>$1</em>',
+			matchRegex: new RegExp("\\*(.+?)\\*", 'g'),
+			converter: function ( argBlock ) {return null;},
+			convertedHTML: new Array()
+		});
+		cAr.push ({	// Strike
+			tag: "SI",	// Just for use array management.
+			priority: 20,
+			provisionalText: '<strike>$1</strike>',
+			matchRegex: new RegExp("~~(.+?)~~", 'g'),
+			converter: function ( argBlock ) {return null;},
+			convertedHTML: new Array()
+		});
+		return cAr;
+	}
+
 	let Obj = {
 		config: {
 			delimiter: "&&",		// delimiter for structure expression
@@ -177,7 +262,14 @@ let makeMDP = function () {
 			codeLangPrefix: "language-"		// ```clang ... ``` -> <pre><code class="language-clang"> ... </code></pre>
 		},
 		blockSyntax: new Array(),
+		inlineSyntax: new Array(),
+
+		// For Syntax modification
 		addBlockSyntax: function ( argSyntax ) {
+			if (argSyntax.tag==null||argSyntax.tag=="") {
+				console.log('tag is required.');
+				return false;
+			} 
 			if (!Number.isInteger(argSyntax.priority)) {
 				console.log('priority should be integer from 0 to 100.');
 				return false;
@@ -201,40 +293,56 @@ let makeMDP = function () {
 				}
 			return false;
 		},
-		// inlineSyntax: new Array(),
-		// addInlineSyntax: function ( arg ) {
-		// 	return true;
-		// },
-		// removeInlineSyntax: function ( tag ) {
-		// 	return true;
-		// },
+		addInlineSyntax: function ( argSyntax ) {
+			if (argSyntax.tag==null||argSyntax.tag=="") {
+				console.log('tag is required.');
+				return false;
+			} 
+			if (!Number.isInteger(argSyntax.priority)) {
+				console.log('priority should be integer from 0 to 100.');
+				return false;
+			} 
+			argSyntax.priority = Math.min(100, argSyntax.priority);
+			argSyntax.priority = Math.max(0, argSyntax.priority);
+			this.removeInlineSyntax(argSyntax.tag);
+			for (let ii = 0; ii < (this.inlineSyntax||[]).length; ii++) {
+				if ( argSyntax.priority > this.inlineSyntax[ii].priority ) {
+					this.inlineSyntax.splice(ii, 0, argSyntax);
+					return true;
+				}
+			}
+			return false;
+		},
+		removeInlineSyntax: function ( argTag ) {
+			for (let ii = 0; ii < (this.inlineSyntax||[]).length; ii++)
+				if (this.inlineSyntax[ii].tag == argTag) {
+					this.inlineSyntax.splice(ii, 1);
+					return true;
+				}
+			return false;
+		},
+
 		mdInlineParser: function ( argText, argFunc, listType ) {
 			const delimiter = this.config.delimiter;
-			// Evacuating comments and formulas --
-			let evacuatedText;
-			evacuatedText = argText.match(  /`(.+?)`/g );
-			argText       = argText.replace(/`(.+?)`/g, delimiter+delimiter+"IC"+delimiter+delimiter);
-			let evacuatedMath;
-			evacuatedMath = argText.match(  /\$(.+?)\$/g );
-			argText       = argText.replace(/\$(.+?)\$/g, delimiter+delimiter+"IM"+delimiter+delimiter);
-			// -- Evacuating comments and formulas
-			argText = argText.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');	// Anchor Link
-			argText = argText.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');	// Strong
-			argText = argText.replace(/~~(.+?)~~/g, '<strike>$1</strike>');	// Strike
-			argText = argText.replace(/\*(.+?)\*/g, '<em>$1</em>');	// Emphasize
+			let cAr = this.inlineSyntax;
+			for (let ii = 0; ii < (cAr||[]).length; ii++) {
+				cAr[ii].convertedHTML = argText.match(  cAr[ii].matchRegex );
+				for (let jj = 0; jj < (cAr[ii].convertedHTML||[]).length; jj++) {
+					cAr[ii].convertedHTML[jj] = cAr[ii].converter(cAr[ii].convertedHTML[jj]);
+				}
+				argText = argText.replace( cAr[ii].matchRegex, cAr[ii].provisionalText );
+			}
 		
 			if (argFunc != null && listType != null)
 				argText = argFunc(argText, listType);
 			else if (argFunc != null && listType == null)
 				argText = argFunc(argText);
 			
-			// Restoring comments and formulas --
-			for (let ii = 0; ii < (evacuatedMath||[]).length; ii++)
-				argText = argText.replace(delimiter+delimiter+"IM"+delimiter+delimiter, evacuatedMath[ii]);
-			for (let ii = 0; ii < (evacuatedText||[]).length; ii++)	// $ is reduced in replace method
-				argText = argText.replace(delimiter+delimiter+"IC"+delimiter+delimiter,
-					"<code>"+ evacuatedText[ii].replace( /\$/g, "$$$$$$").replace(/`/g,"").replace(/</g,'&lt;').replace(/>/g,'&gt;') +"</code>");
-			// -- Restoring comments and formulas
+			for (let ii = 0; ii < (cAr||[]).length; ii++) {
+				for (let jj = 0; jj < (cAr[ii].convertedHTML||[]).length; jj++) {
+					argText = argText.replace( delimiter+delimiter+cAr[ii].tag+delimiter+delimiter, cAr[ii].convertedHTML[jj] );
+				}
+			}
 			return argText;
 		},
 		mdTBParser: function ( argText ) {
@@ -363,6 +471,7 @@ let makeMDP = function () {
 				retText += arguments.callee(tempText);
 			return retText + '\n</blockquote>';
 		},
+
 		analyzeStructure: function( argText ) {
 			const cAr = this.blockSyntax;
 			// pre-formatting
@@ -398,5 +507,6 @@ let makeMDP = function () {
 		}
 	}
 	Obj.blockSyntax = makeBlockSyntax(Obj);
+	Obj.inlineSyntax = makeInlineSyntax(Obj);
 	return Obj;
 }

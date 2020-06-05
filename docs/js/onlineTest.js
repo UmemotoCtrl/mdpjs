@@ -26,9 +26,12 @@ var raw;
 var selector;
 var radioList;
 
-var converter = new showdown.Converter();
-var markdownit;
 var mdp = makeMDP();
+var showdownConverter = new showdown.Converter();
+var commonmarkReader = new commonmark.Parser();
+var commonmarkWriter = new commonmark.HtmlRenderer();
+var remarkable1;
+var markdownit;
 
 let writeHTML = function () {
 	var htmlTxt
@@ -37,9 +40,14 @@ let writeHTML = function () {
 	} else if ( radioNodeList.value == "markdown-it" ) {
 		htmlTxt = markdownit.render(mdInput.value);
 	} else if ( radioNodeList.value == "showdown" ) {
-		htmlTxt = converter.makeHtml(mdInput.value);
+		htmlTxt = showdownConverter.makeHtml(mdInput.value);
 	} else if ( radioNodeList.value == "marked" ) {
 		htmlTxt = marked(mdInput.value);
+	} else if ( radioNodeList.value == "commonmark" ) {
+		var parsed = commonmarkReader.parse(mdInput.value); // parsed is a 'Node' tree
+		htmlTxt = commonmarkWriter.render(parsed); // result is a String	
+	} else if ( radioNodeList.value == "remarkable" ) {
+		htmlTxt = remarkable1.render(mdInput.value);
 	}
 	article.innerHTML = htmlTxt;
 	raw.innerHTML = htmlTxt.replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -50,14 +58,16 @@ let writeHTML = function () {
 
 window.onload = function() {
 	markdownit = window.markdownit();
-	var data = "# Comparison Javascript Markdown Parsers\n\nThis is demo for mdp.js. For detail information, see [GitHub Repo](https://github.com/UmemotoCtrl/MarkdownParser).\n\n## You can change Markdown parser. Parser Option\n\n* markdown-it, [repo](https://github.com/markdown-it/markdown-it)\n* Showdown, [repo](https://github.com/showdownjs/showdown)\n* Marked, [repo](https://github.com/markedjs/marked)\n\n## Inline notation\n\n1. *em*\n1. **strong**\n1. ~~strike~~\n1. `code`\n1. [Anchor link to GitHub Repo](https://github.com/UmemotoCtrl/MarkdownParser)\n1. Inline math $\\dot{x} = f(x)$\n\n## Block notation\n\n### Table\n\n| A | B | C |\n| :---:  | ---:  | :--- |\n| $|\\alpha |$ | $|\\beta |$ ||\n| 1 || 2 |\n\n### Math formula in independent line\n\n\\[\n\\tag{1} \\dfrac{\\partial y}{\\partial x} = x\n\\]\n\n$$\n\\tag{2} f(x) :=\\begin{cases}1,\\quad &\\mbox{if}~ x\\neq 0 \\\\ 0,\\quad &\\mbox{if}~ x = 0\\end{cases}\n$$\n\n### List\n\n* a\n* b\n  1. A\n  1. B\n\n### Code block\n\n```markdown\n* a\n* b\n  1. A\n  1. B\n```\n\n### Horizontal rule\n\n---\n\n### Comment block\n\n<!--\nThis is not shown.\n-->\n\n";
+	remarkable1 = new window.remarkable.Remarkable;
+
+
 	mdInput = document.getElementById("mdInput");
 	article = document.getElementById("article");
 	raw     = document.getElementById("raw");
 	selector= document.getElementById("selector") ;
 	radioNodeList = selector.parser;
-
-	mdInput.value = data;
+	
+	mdInput.value = "# Comparison Javascript Markdown Parsers\n\nThis is demo for mdp.js. For detail information, see [GitHub Repo](https://github.com/UmemotoCtrl/MarkdownParser).\n\n## You can change Markdown parser. Parser Option\n\n* markdown-it, [repo](https://github.com/markdown-it/markdown-it)\n* Showdown, [repo](https://github.com/showdownjs/showdown)\n* Marked, [repo](https://github.com/markedjs/marked)\n* commonmark, [repo](https://github.com/commonmark/commonmark.js)\n* remarkable, [repo](https://github.com/jonschlinkert/remarkable)\n\n## Inline notation\n\n1. *em*\n1. **strong**\n1. ~~strike~~\n1. `code`\n1. [Anchor link to GitHub Repo](https://github.com/UmemotoCtrl/MarkdownParser)\n1. Inline math $\\| f(x)\\|$\n\n## Block notation\n\n### Table\n\n| A | B | C |\n| :---:  | ---:  | :--- |\n| $|\\alpha |$ | $|\\beta |$ ||\n| 1 || 2 |\n\n### Math formula in independent line\n\n\\[\n\\tag{1} \\dfrac{\\partial y}{\\partial x} = x\n\\]\n\n$$\n\\tag{2} f(x) :=\\begin{cases}1,\\quad &\\mbox{if}~ x\\neq 0 \\\\ 0,\\quad &\\mbox{if}~ x = 0\\end{cases}\n$$\n\n### List\n\n* a\n* b\n  1. A\n  1. B\n\n### Code block\n\n```markdown\n* a\n* b\n  1. A\n  1. B\n```\n\n### Horizontal rule\n\n---\n\n### Comment block\n\n<!--\nThis is not shown.\n-->\n\n";
 	writeHTML();
 	mdInput.oninput = writeHTML;
 	selector.onchange = writeHTML;

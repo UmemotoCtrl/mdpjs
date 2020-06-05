@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.min.css">
   <style>
 body {
-  max-width: 1200px;
+  max-width: 100%;
 }
 div#article {
   width: 54%;
@@ -23,13 +23,18 @@ textarea#mdInput {
   resize: none;
 }
 div#TopMenu {
+  margin: 15px;
   float: right;
   display: flex;
 }
 form#selector {
-  margin-left: 15px;
+  margin-bottom: 15px;
 }
   </style>
+  <!-- remarkable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/remarkable/2.0.1/remarkable.min.js" integrity="sha256-blWQoMt0+lqHvv7q7wShOwoWOiQITkNA/Bssik2U/08=" crossorigin="anonymous"></script>
+  <!-- commonmark -->
+  <script src="js/commonmark.js" defer></script>
   <!-- markdown-it -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/11.0.0/markdown-it.min.js" integrity="sha256-3mv+NUxFuBg26MtcnuN2X37WUxuGunWCCiG2YCSBjNc=" crossorigin="anonymous" defer></script>
   <!-- Showdown -->
@@ -53,21 +58,23 @@ form#selector {
 <body>
   <div id="TopMenu">
     <p><b><a href="https://github.com/UmemotoCtrl/MarkdownParser">Go GitHub Repo</a></b></p>
-    <form id="selector">
-      <h3>Parser Selection</h3>
-      <input type="radio" name="parser" value="mdp" checked>mdp
-      <input type="radio" name="parser" value="markdown-it">markdown-it
-      <input type="radio" name="parser" value="showdown">showdown
-      <input type="radio" name="parser" value="marked">marked
-    </form>
   </div>
   <h1>Comparison Javascript Markdown Parsers</h1>
+  <form id="selector">
+    <h3>Parser Selection</h3>
+    <input type="radio" name="parser" value="mdp" checked>mdp
+    <input type="radio" name="parser" value="markdown-it">markdown-it
+    <input type="radio" name="parser" value="showdown">showdown
+    <input type="radio" name="parser" value="marked">marked
+    <input type="radio" name="parser" value="commonmark">commonmark
+    <input type="radio" name="parser" value="remarkable">remarkable
+  </form>
   <textarea id="mdInput">Input</textarea>
   <div id="article"></div>
   <h2>Parsed HTML</h2>
   <pre><code id="raw"></code></pre>
   <hr>
-  <p> MDP, Marked and MathJax are used to display this page. You can view it with a compatible browser.</p>
+  <p> Various Javascript Markdown parsers and MathJax are used to display this page. You can view it with a compatible browser.</p>
   <p>Copyright (c) 2020 Kazuki Umemoto</p>
 </body>
 </html>
