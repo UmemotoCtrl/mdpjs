@@ -453,6 +453,7 @@ let makeMDP = function () {
 		},
 		mdBlockquoteParser: function ( argText ) {
 			let retText = '<blockquote>\n';
+			argText = argText.replace( /\n\s*(?=[^>])/g, " ");
 			argText = argText.replace( /^\s*>\s*/, "").replace( /\n\s*>\s*/g, "\n");
 			let lineText = argText.split(/\n/);
 			let tempText = "";
