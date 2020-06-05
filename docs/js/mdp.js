@@ -5,10 +5,10 @@
 //
 
 const delimiter = "&&";		// delimiter for structure expression
-const mathDelimiter1 = new Array("\\${2}", "\\${2}");	// in Regex form, = "$$ ... $$"
-const mathDelimiter2 = new Array("\\\\\[", "\\\\\]");	// in Regex form, alternative, = "\[ ... \]"
+const mathDelimiter = new Array(["\\${2}", "\\${2}"], ["\\\\\[", "\\\\\]"]);
+// in Regex form, = "$$ ... $$", and "\[ ... \]"
 const tabTo = "  ";			// \t -> two spaces
-const codeLangPrefix = "language-";		// ```clang -> <code class="language-clang">
+const codeLangPrefix = "language-";		// ```clang ... ``` -> <pre><code class="language-clang"> ... </code></pre>
 
 function mdp( argText ) {
 	let mdInlineParser = function ( argText, argFunc, listType ) {
@@ -192,24 +192,17 @@ function mdp( argText ) {
 			},
 			"convertedHTML": new Array()
 		});
-		cAr.push ( {	// Math block - 1
-			"tag": "MA",
-			"provisionalText": "\n"+delimiter+"MA"+delimiter,
-			"matchRegex": new RegExp("\\n"+mathDelimiter1[0]+"\\n[\\s\\S]+?\\n"+mathDelimiter1[1]+"(?=\\n)", 'g'),
-			"converter": function ( argBlock ) {
-				return argBlock.replace( /\$/g, "$$$$").replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
-			},
-			"convertedHTML": new Array()
-		});
-		cAr.push ( {	// Math block - 2
-			"tag": "MB",
-			"provisionalText": "\n"+delimiter+"MB"+delimiter,
-			"matchRegex": new RegExp("\\n"+mathDelimiter2[0]+"\\n[\\s\\S]+?\\n"+mathDelimiter2[1]+"(?=\\n)", 'g'),
-			"converter": function ( argBlock ) {
-				return argBlock.replace( /\$/g, "$$$$").replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
-			},
-			"convertedHTML": new Array()
-		});
+		for (let jj = 0; jj < (mathDelimiter||[]).length; jj++) {	// Math blocks
+			cAr.push ( {
+				"tag": "M"+jj,
+				"provisionalText": "\n"+delimiter+"M"+jj+delimiter,
+				"matchRegex": new RegExp("\\n"+mathDelimiter[jj][0]+"\\n[\\s\\S]+?\\n"+mathDelimiter[jj][1]+"(?=\\n)", 'g'),
+				"converter": function ( argBlock ) {
+					return argBlock.replace( /\$/g, "$$$$").replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
+				},
+				"convertedHTML": new Array()
+			});
+		}
 		cAr.push ( {	// HTML comment block
 			"tag": "CM",
 			"provisionalText": "\n"+delimiter+"CM"+delimiter,
@@ -220,10 +213,19 @@ function mdp( argText ) {
 			},
 			"convertedHTML": new Array()
 		});
+		cAr.push ( {	// Horizontal Rule
+			"tag": "HR",
+			"provisionalText": "\n\n"+delimiter+"HR"+delimiter+"\n",
+			"matchRegex": new RegExp("\\n *[-+*=] *[-+*=] *[-+*=][-+*= ]*(?=\\n)", 'g'),
+			"converter": function ( argBlock ) {
+				return "<hr>";
+			},
+			"convertedHTML": new Array()
+		});
 		cAr.push ( {	// Blockquote
 			"tag": "BQ",
 			"provisionalText": "\n"+delimiter+"BQ"+delimiter,
-			"matchRegex": new RegExp("\\n\\s*>\\s*[\\s\\S]*?(?=\\n\\n)", 'g'),
+			"matchRegex": new RegExp("\\n *> *[\\s\\S]*?(?=\\n\\n)", 'g'),
 			"converter": function ( argBlock ) {
 				var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
@@ -234,7 +236,7 @@ function mdp( argText ) {
 		cAr.push ( {	// Table
 			"tag": "TB",
 			"provisionalText": "\n\n"+delimiter+"TB"+delimiter,
-			"matchRegex": new RegExp("\\n\\n\\|.+?\\|\\s*?\\n\\|[-:|\\s]*?\\|\\s*?\\n\\|.+?\\|[\\s\\S]*?(?=\\n\\n)", 'g'),
+			"matchRegex": new RegExp("\\n\\n\\|.+?\\| *\\n\\|[-:| ]*\\| *\\n\\|.+?\\|[\\s\\S]*?(?=\\n\\n)", 'g'),
 			"converter": function ( argBlock ) {
 				var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
@@ -242,10 +244,11 @@ function mdp( argText ) {
 			},
 			"convertedHTML": new Array()
 		});
+		// Before this line, the blocks can be included in lists excepting table and horizontal rule.
 		cAr.push ( {	// UList
 			"tag": "UL",
 			"provisionalText": "\n\n"+delimiter+"UL"+delimiter,
-			"matchRegex": new RegExp("\\n\\n\\s*[-+*]\\s[\\s\\S]*?(?=\\n\\n)", 'g'),
+			"matchRegex": new RegExp("\\n\\n\\ *[-+*] [\\s\\S]*?(?=\\n\\n)", 'g'),
 			"converter": function ( argBlock ) {
 				var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
@@ -256,7 +259,7 @@ function mdp( argText ) {
 		cAr.push ( {	// OList
 			"tag": "OL",
 			"provisionalText": "\n\n"+delimiter+"OL"+delimiter,
-			"matchRegex": new RegExp("\\n\\n\\s*\\d+?\\.\\s[\\s\\S]*?(?=\\n\\n)", 'g'),
+			"matchRegex": new RegExp("\\n\\n *\\d+?\\. [\\s\\S]*?(?=\\n\\n)", 'g'),
 			"converter": function ( argBlock ) {
 				var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
@@ -264,28 +267,20 @@ function mdp( argText ) {
 			},
 			"convertedHTML": new Array()
 		});
-		for (let jj = 1; jj < 5; jj++) {
-			cAr.push ( {	// Header
+		// After this line, the blocks are NOT included in lists.
+		for (let jj = 1; jj < 5; jj++) {	// Headers
+			cAr.push ( {
 				"tag": "H"+jj,
 				"provisionalText": "\n"+delimiter+"H"+jj+delimiter,
-				"matchRegex": new RegExp("\\n#{"+jj+"}\\s+.*?(?=\\n)", 'g'),
+				"matchRegex": new RegExp("\\n#{"+jj+"} +.+?(?=\\n)", 'g'),
 				"converter": function ( argBlock ) {
 					var temp = argBlock.replace(/"/g, '')
-						.replace( new RegExp('^\\n*#{'+jj+'}\\s+(.*?)\\n*$'), '<h'+jj+' id="$1">$1</h'+jj+'>' );
+						.replace( new RegExp('^\\n*#{'+jj+'} +(.+?)[\\s#]*$'), '<h'+jj+' id="$1">$1</h'+jj+'>' );
 					return mdInlineParser(temp, null, null);
 				},
 				"convertedHTML": new Array()
 			});
 		}
-		cAr.push ( {	// Horizontal Rule
-			"tag": "HR",
-			"provisionalText": "\n"+delimiter+"HR"+delimiter,
-			"matchRegex": new RegExp("\\n\\s*?-{3,}\\s*(?=\\n)", 'g'),
-			"converter": function ( argBlock ) {
-				return "<hr>";
-			},
-			"convertedHTML": new Array()
-		});
 		cAr.push ( {	// Paragraph
 			"tag": "PP",
 			"provisionalText": "\n"+delimiter+"PP"+delimiter,
