@@ -27,15 +27,15 @@ var selector;
 var radioList;
 
 var converter = new showdown.Converter();
-// var mdit = new MarkdownIt();
-var mdit;
+var markdownit;
+var mdp = makeMDP();
 
 let writeHTML = function () {
 	var htmlTxt
 	if ( radioNodeList.value == "mdp" ) {
-		htmlTxt = mdp(mdInput.value);
+		htmlTxt = mdp.render(mdInput.value);
 	} else if ( radioNodeList.value == "markdown-it" ) {
-		htmlTxt = mdit.render(mdInput.value);
+		htmlTxt = markdownit.render(mdInput.value);
 	} else if ( radioNodeList.value == "showdown" ) {
 		htmlTxt = converter.makeHtml(mdInput.value);
 	} else if ( radioNodeList.value == "marked" ) {
@@ -45,11 +45,11 @@ let writeHTML = function () {
 	raw.innerHTML = htmlTxt.replace(/</g,'&lt;').replace(/>/g,'&gt;');
 	if ( MathJax.typesetPromise )
 		MathJax.typesetPromise();
-	console.log ( mdInput.value.replace(/\\/g,'\\\\').replace(/\n/g,'\\n') );
+	// console.log ( mdInput.value.replace(/\\/g,'\\\\').replace(/\n/g,'\\n') );
 }
 
 window.onload = function() {
-	mdit = window.markdownit();
+	markdownit = window.markdownit();
 	var data = "# Comparison Javascript Markdown Parsers\n\nThis is demo for mdp.js. For detail information, see [GitHub Repo](https://github.com/UmemotoCtrl/MarkdownParser).\n\n## You can change Markdown parser. Parser Option\n\n* markdown-it, [repo](https://github.com/markdown-it/markdown-it)\n* Showdown, [repo](https://github.com/showdownjs/showdown)\n* Marked, [repo](https://github.com/markedjs/marked)\n\n## Inline notation\n\n1. *em*\n1. **strong**\n1. ~~strike~~\n1. `code`\n1. [Anchor link to GitHub Repo](https://github.com/UmemotoCtrl/MarkdownParser)\n1. Inline math $\\dot{x} = f(x)$\n\n## Block notation\n\n### Table\n\n| A | B | C |\n| :---:  | ---:  | :--- |\n| $|\\alpha |$ | $|\\beta |$ ||\n| 1 || 2 |\n\n### Math formula in independent line\n\n\\[\n\\tag{1} \\dfrac{\\partial y}{\\partial x} = x\n\\]\n\n$$\n\\tag{2} f(x) :=\\begin{cases}1,\\quad &\\mbox{if}~ x\\neq 0 \\\\ 0,\\quad &\\mbox{if}~ x = 0\\end{cases}\n$$\n\n### List\n\n* a\n* b\n  1. A\n  1. B\n\n### Code block\n\n```markdown\n* a\n* b\n  1. A\n  1. B\n```\n\n### Horizontal rule\n\n---\n\n### Comment block\n\n<!--\nThis is not shown.\n-->\n\n";
 	mdInput = document.getElementById("mdInput");
 	article = document.getElementById("article");
