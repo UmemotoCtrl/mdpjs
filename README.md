@@ -11,7 +11,12 @@ Download [mdp.js](https://github.com/UmemotoCtrl/MarkdownParser/blob/master/docs
 <script type="text/javascript" src="js/mdp.js"></script>
 ```
 
-where src should match your environment, then`var parsed_html = mdp(markdown_text);`.
+where src should match your environment, then execute
+
+```javascript
+var mdp = makeMDP();
+var html_text = mdp.render( markdown_test );
+```
 
 ## Feature
 
