@@ -143,8 +143,8 @@ let makeMDP = function () {
 		cAr.push ( {	// UList
 			tag: "UL",
 			priority: 20,
-			provisionalText: "\n\n"+delimiter+"UL"+delimiter,
-			matchRegex: new RegExp("\\n\\n\\ *[-+*] [\\s\\S]*?(?=\\n\\n)", 'g'),
+			provisionalText: "\n"+delimiter+"UL"+delimiter,
+			matchRegex: new RegExp('^ *[-+*] [\\s\\S]*?$(?!\\n^ *[-+*] |\\n^ {2,}.|\\n^$)', 'gm'),
 			converter: function ( argBlock ) {
 				var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
@@ -155,8 +155,8 @@ let makeMDP = function () {
 		cAr.push ( {	// OList
 			tag: "OL",
 			priority: 20,
-			provisionalText: "\n\n"+delimiter+"OL"+delimiter,
-			matchRegex: new RegExp("\\n\\n *\\d+?\\. [\\s\\S]*?(?=\\n\\n)", 'g'),
+			provisionalText: "\n"+delimiter+"OL"+delimiter,
+			matchRegex: new RegExp('^ *\\d+?\\. [\\s\\S]*?$(?!\\n^ *\\d+?\\. |\\n^ {2,}.|\\n^$)', 'gm'),
 			converter: function ( argBlock ) {
 				var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
@@ -183,7 +183,7 @@ let makeMDP = function () {
 			tag: "PP",
 			priority: 0,
 			provisionalText: "\n"+delimiter+"PP"+delimiter,
-			matchRegex: new RegExp("\\n[^"+delimiter[0]+"\\n][\\s\\S]*?(?=\\n\\n)", 'g'),
+			matchRegex: new RegExp('^.(?!'+delimiter[0]+'.{2}'+delimiter+')[\\s\\S]*?\\n$', 'gm'),
 			converter: function ( argBlock ) {
 				var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "<p>$1</p>" );

@@ -50,6 +50,7 @@ let writeHTML = function () {
 		htmlTxt = remarkable1.render(mdInput.value);
 	}
 	article.innerHTML = htmlTxt;
+	// raw.innerHTML = mdp.analyzeStructure(mdInput.value);
 	raw.innerHTML = htmlTxt.replace(/</g,'&lt;').replace(/>/g,'&gt;');
 	if ( MathJax.typesetPromise )
 		MathJax.typesetPromise();
