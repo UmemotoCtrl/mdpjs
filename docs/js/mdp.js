@@ -11,7 +11,7 @@
 // var html_text = mdp.render( markdown_test );
 // 
 // ============
-// CHANGE SYNTAX
+// TO CHANGE SYNTAX
 // ============
 // 
 // mdp.addBlockSyntax ({	// this is sample for Horizontal Rule
@@ -35,16 +35,16 @@
 // 	convertedHTML: new Array()
 // });
 // mdp.addBlockSyntax ({	// this is sample for Setext headings
-// 		tag: "SH",
-// 		priority: 60,
-// 		provisionalText: "\n"+mdp.config.delimiter+"SH"+mdp.config.delimiter+"\n",	// should include delimiter+tag+delimiter
-// 		matchRegex: new RegExp("\\n.+\\n *=+[ =]*=+ *(?=\\n)", 'g'),
-// 		converter: function ( argBlock ) {
-// 			var temp = argBlock.replace(/"/g, '')
-// 			.replace( new RegExp('^\\n*(.+)\\n *=+[ =]*=+ *'), '<h1 id="$1">$1</h1>' );
-// 			return mdp.mdInlineParser(temp, null, null);
-// 		},
-// 		convertedHTML: new Array()
+// 	tag: "SH",
+// 	priority: 60,
+// 	provisionalText: mdp.config.delimiter+"SH"+mdp.config.delimiter,	// should include delimiter+tag+delimiter
+// 	matchRegex: new RegExp("^.+\\n *=+[ =]*=+ *(?=\\n)", 'gm'),
+// 	converter: function ( argBlock ) {
+// 		var temp = argBlock.replace(/"/g, '')
+// 			.replace( new RegExp('^ *(.+)\\n.*$'), '<h1 id="$1">$1</h1>' );
+// 		return mdp.mdInlineParser(temp, null);
+// 	},
+// 	convertedHTML: new Array()
 // });
 // mdp.removeBlockSyntax("H1");
 
@@ -59,57 +59,66 @@ let makeMDP = function () {
 		cAr.push ( {	// Code block with code name
 			tag: "CB",
 			priority: 100,
-			provisionalText: "\n"+delimiter+"CB"+delimiter,
-			matchRegex: new RegExp("\\n\\`\\`\\`.+?\\n[\\s\\S]*?\\n\\`\\`\\`(?=\\n)", 'g'),
+			provisionalText: delimiter+"CB"+delimiter,
+			matchRegex: new RegExp("^`{3}.*?\\n[\\s\\S]*?\\n`{3}$", 'gm'),
 			converter: function ( argBlock ) {
-				return argBlock.replace( /\$/g, "$$$$").replace(	// $ will be reduced in replace method
-					new RegExp("^\\n*\\`\\`\\`(.+?)\\n([\\s\\S]*)\\n\\`\\`\\`\\n*$"),
-					'<pre><code class="'+codeLangPrefix+'$1">$2</code></pre>'
-				);
+				if (/^`{3}.+$/m.test(argBlock))
+					return argBlock.replace( /\$/g, "$$$$").replace(	// $ will be reduced in replace method
+						new RegExp("^`{3}(.+?)\\n([\\s\\S]*)\\n`{3}$"),
+						'<pre><code class="'+codeLangPrefix+'$1">$2</code></pre>'
+					);
+				else
+					return argBlock.replace( /\$/g, "$$$$").replace(
+						new RegExp("^`{3}\\n([\\s\\S]*)\\n`{3}$"),
+						"<pre><code>$1</code></pre>"
+					);
 			},
 			convertedHTML: new Array()
 		});
-		cAr.push ( {	// Code block without code name
-			tag: "CC",
-			priority: 90,
-			provisionalText: "\n"+delimiter+"CC"+delimiter,
-			matchRegex: new RegExp("\\n\\`\\`\\`\\n[\\s\\S]*?\\n\\`\\`\\`(?=\\n)", 'g'),
-			converter: function ( argBlock ) {
-				return argBlock.replace( /\$/g, "$$$$").replace(
-					new RegExp("^\\n*\\`\\`\\`\\n([\\s\\S]*)\\n\\`\\`\\`\\n*$"),
-					"<pre><code>$1</code></pre>"
-				);
-			},
-			convertedHTML: new Array()
-		});
-		for (let jj = 0; jj < (mathDelimiter||[]).length; jj++) {	// Math blocks
-			cAr.push ( {
-				tag: "M"+jj,
-				priority: 80,
-				provisionalText: "\n"+delimiter+"M"+jj+delimiter,
-				matchRegex: new RegExp("\\n"+mathDelimiter[jj][0]+"\\n[\\s\\S]+?\\n"+mathDelimiter[jj][1]+"(?=\\n)", 'g'),
-				converter: function ( argBlock ) {
-					return argBlock.replace( /\$/g, "$$$$").replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
-				},
-				convertedHTML: new Array()
-			});
+		var mathRegEx = "";
+		for (let jj = 0; jj < (mathDelimiter||[]).length; jj++) {
+			mathRegEx += "^"+mathDelimiter[jj][0]+"\\n[\\s\\S]+?\\n"+mathDelimiter[jj][1]+"$|";
 		}
+		mathRegEx = mathRegEx.replace(/\|$/, '');
+		cAr.push ( {// Math blocks
+			tag: "MB",
+			priority: 80,
+			provisionalText: delimiter+"MB"+delimiter,
+			matchRegex: new RegExp(mathRegEx, 'gm'),
+			converter: function ( argBlock ) {
+				return argBlock.replace( /\$/g, "$$$$").replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
+			},
+			convertedHTML: new Array()
+		});
 		cAr.push ( {	// HTML comment block
 			tag: "CM",
 			priority: 70,
-			provisionalText: "\n"+delimiter+"CM"+delimiter,
-			matchRegex: new RegExp("\\n<!--[\\s\\S]*?-->(?=\\n)", 'g'),
+			provisionalText: delimiter+"CM"+delimiter,
+			matchRegex: new RegExp("^<!--[\\s\\S]*?-->$", 'gm'),
 			converter: function ( argBlock ) {
 				return argBlock.replace( /\$/g, "$$$$")
-					.replace( new RegExp("^\\n*(<!--[\\s\\S]*?-->)\\n*$"), "$1" );
+					.replace( new RegExp("^(<!--[\\s\\S]*?-->)$"), "$1" );
+			},
+			convertedHTML: new Array()
+		});
+		cAr.push ( {
+			tag: "HD",
+			priority: 60,
+			provisionalText: "\n"+delimiter+"HD"+delimiter+"\n",	// to divide list, \n is added.
+			matchRegex: new RegExp("^#{1,} +.+$", 'gm'),
+			converter: function ( argBlock ) {
+				var num = argBlock.match(/^#{1,}(?= )/)[0].length;
+				var temp = argBlock.replace(/"/g, '')
+					.replace( new RegExp('^\\n*#{1,} +(.+?)[\\s#]*$'), '<h'+num+' id="$1">$1</h'+num+'>' );
+				return Obj.mdInlineParser(temp, null);
 			},
 			convertedHTML: new Array()
 		});
 		cAr.push ( {	// Horizontal Rule
 			tag: "HR",
 			priority: 50,
-			provisionalText: "\n\n"+delimiter+"HR"+delimiter+"\n",	// to divide list, \n is added.
-			matchRegex: new RegExp("\\n *[-+*=] *[-+*=] *[-+*=][-+*= ]*(?=\\n)", 'g'),
+			provisionalText: "\n"+delimiter+"HR"+delimiter+"\n",	// to divide list, \n is added.
+			matchRegex: new RegExp("^ *[-+*=] *[-+*=] *[-+*=][-+*= ]*$", 'gm'),
 			converter: function ( argBlock ) {
 				return "<hr>";
 			},
@@ -118,76 +127,55 @@ let makeMDP = function () {
 		cAr.push ( {	// Blockquote
 			tag: "BQ",
 			priority: 40,
-			provisionalText: "\n"+delimiter+"BQ"+delimiter,
-			matchRegex: new RegExp("\\n *> *[\\s\\S]*?(?=\\n\\n)", 'g'),
+			provisionalText: delimiter+"BQ"+delimiter,
+			matchRegex: new RegExp("^ *> *[\\s\\S]*?(?=\\n\\n)", 'gm'),
 			converter: function ( argBlock ) {
 				var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
-				return Obj.mdInlineParser( temp, Obj.mdBlockquoteParser, null );
+				return Obj.mdInlineParser( temp, Obj.mdBlockquoteParser );
 			},
 			convertedHTML: new Array()
 		});
 		cAr.push ( {	// Table
 			tag: "TB",
 			priority: 30,
-			provisionalText: "\n\n"+delimiter+"TB"+delimiter,
-			matchRegex: new RegExp("\\n\\n\\|.+?\\| *\\n\\|[-:| ]*\\| *\\n\\|.+?\\|[\\s\\S]*?(?=\\n\\n)", 'g'),
+			provisionalText: delimiter+"TB"+delimiter,
+			matchRegex: new RegExp("^\\|.+?\\| *\\n\\|[-:| ]*\\| *\\n\\|.+?\\|[\\s\\S]*?(?=\\n\\n)", 'gm'),
 			converter: function ( argBlock ) {
 				var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
-				return Obj.mdInlineParser( temp, Obj.mdTBParser, null );
+				return Obj.mdInlineParser( temp, Obj.mdTBParser );
 			},
 			convertedHTML: new Array()
 		});
-		// Before this line, the blocks can be included in lists excepting table and horizontal rule.
-		cAr.push ( {	// UList
-			tag: "UL",
+		cAr.push ( {	// List
+			tag: "LT",
 			priority: 20,
-			provisionalText: "\n"+delimiter+"UL"+delimiter,
-			matchRegex: new RegExp('^ *[-+*] [\\s\\S]*?$(?!\\n^ *[-+*] |\\n^ {2,}.|\\n^$)', 'gm'),
+			provisionalText: delimiter+"LT"+delimiter,
+			matchRegex: new RegExp('^ *\\d+?\\. [\\s\\S]*?$(?!\\n\\s*^ *\\d+?\\. |\\n\\s*^ {2,}.+$)(?=\\n\\n)'+'|'
+					+'^ *[-+*] [\\s\\S]*?$(?!\\n\\s*^ *[-+*] |\\n\\s*^ {2,}.+$)(?=\\n\\n)', 'gm'),
 			converter: function ( argBlock ) {
+				if ( /^ *$/m.test(argBlock) ) {	// loose list
+					argBlock = argBlock.replace(/^( *[-+*] )([\s\S]*?)(?=\n *$|\n *[-+*] .*$)/gm, '$1<p>$2</p>');
+					argBlock = argBlock.replace(/^( *\\d+?\\. )([\s\S]*?)(?=\n *$|\n *\\d+?\\. .*$)/gm, '$1<p>$2</p>');
+					argBlock = argBlock.replace(/^$\n^ {2,}(?![-+*] |\\d+?\\. )(.*)$/gm, '<p>$1</p>');
+					argBlock = argBlock.replace(/^ *\n/gm, '');
+				}
 				var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
-				return Obj.mdInlineParser( temp, Obj.mdListParser, "UL" );
+				return Obj.mdInlineParser( temp, Obj.mdListParser );
 			},
 			convertedHTML: new Array()
 		});
-		cAr.push ( {	// OList
-			tag: "OL",
-			priority: 20,
-			provisionalText: "\n"+delimiter+"OL"+delimiter,
-			matchRegex: new RegExp('^ *\\d+?\\. [\\s\\S]*?$(?!\\n^ *\\d+?\\. |\\n^ {2,}.|\\n^$)', 'gm'),
-			converter: function ( argBlock ) {
-				var temp = argBlock
-					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
-				return Obj.mdInlineParser( temp, Obj.mdListParser, "OL" );
-			},
-			convertedHTML: new Array()
-		});
-		// After this line, the blocks are NOT included in lists.
-		for (let jj = 1; jj < 5; jj++) {	// Headers
-			cAr.push ( {
-				tag: "H"+jj,
-				priority: 10,
-				provisionalText: "\n"+delimiter+"H"+jj+delimiter,
-				matchRegex: new RegExp("\\n#{"+jj+"} +.+?(?=\\n)", 'g'),
-				converter: function ( argBlock ) {
-					var temp = argBlock.replace(/"/g, '')
-						.replace( new RegExp('^\\n*#{'+jj+'} +(.+?)[\\s#]*$'), '<h'+jj+' id="$1">$1</h'+jj+'>' );
-					return Obj.mdInlineParser(temp, null, null);
-				},
-				convertedHTML: new Array()
-			});
-		}
 		cAr.push ( {	// Paragraph
 			tag: "PP",
 			priority: 0,
-			provisionalText: "\n"+delimiter+"PP"+delimiter,
+			provisionalText: delimiter+"PP"+delimiter,
 			matchRegex: new RegExp('^.(?!'+delimiter[0]+'.{2}'+delimiter+')[\\s\\S]*?\\n$', 'gm'),
 			converter: function ( argBlock ) {
 				var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "<p>$1</p>" );
-					return Obj.mdInlineParser(temp, null, null);
+					return Obj.mdInlineParser(temp, null);
 			},
 			convertedHTML: new Array()
 		});
@@ -322,7 +310,7 @@ let makeMDP = function () {
 			return false;
 		},
 
-		mdInlineParser: function ( argText, argFunc, listType ) {
+		mdInlineParser: function ( argText, argFunc ) {
 			const delimiter = this.config.delimiter;
 			let cAr = this.inlineSyntax;
 			for (let ii = 0; ii < (cAr||[]).length; ii++) {
@@ -333,9 +321,7 @@ let makeMDP = function () {
 				argText = argText.replace( cAr[ii].matchRegex, cAr[ii].provisionalText );
 			}
 		
-			if (argFunc != null && listType != null)
-				argText = argFunc(argText, listType);
-			else if (argFunc != null && listType == null)
+			if (argFunc != null)
 				argText = argFunc(argText);
 			
 			for (let ii = 0; ii < (cAr||[]).length; ii++) {
@@ -384,7 +370,7 @@ let makeMDP = function () {
 			retText +=  "</tbody></table>";
 			return retText;
 		},
-		mdListParser: function ( argText, listType ) {
+		mdListParser: function ( argText ) {
 			let checkListDepth = function ( argLine ) {
 				let listType = checkListType ( argLine );
 				let spaceRegex;
@@ -413,6 +399,7 @@ let makeMDP = function () {
 			}
 			let lines = argText.split(/\n/g);
 			let depth = checkListDepth(lines[0]);
+			let listType = checkListType(lines[0]);
 			let retText = "";
 			let listRegex;
 			if (listType == "OL")
