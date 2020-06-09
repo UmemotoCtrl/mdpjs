@@ -25,7 +25,6 @@ textarea#mdInput {
 div#TopMenu {
   margin: 15px;
   float: right;
-  display: flex;
 }
 form#selector {
   margin-bottom: 15px;
@@ -58,9 +57,11 @@ form#selector {
 <body>
   <div id="TopMenu">
     <p><b><a href="https://github.com/UmemotoCtrl/MarkdownParser">Go GitHub Repo</a></b></p>
+    <p>Processing TIme: <b id='time'></b></p>
   </div>
+  <div id='time'></div>
   <h1>Comparison Javascript Markdown Parsers</h1>
-  <form id="selector">
+   <form id="selector">
     <h3>Parser Selection</h3>
     <input type="radio" name="parser" value="mdp" checked>mdp
     <input type="radio" name="parser" value="markdown-it">markdown-it
@@ -74,7 +75,7 @@ form#selector {
   <h2>Parsed HTML</h2>
   <pre><code id="raw"></code></pre>
   <hr>
-  <p> Various Javascript Markdown parsers and MathJax are used to display this page. You can view it with a compatible browser.</p>
+  <p> Various Javascript Markdown parsers and MathJax are used to display this page. Google Chrome is recommended.</p>
   <p>Copyright (c) 2020 Kazuki Umemoto</p>
 </body>
 </html>
