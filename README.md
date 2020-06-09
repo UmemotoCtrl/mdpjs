@@ -3,6 +3,8 @@ A somewhat functional JavaScript Markdown parser, affinity with formulas [Web Si
 
 This script aims to use in Client-side and was made as alternative for existing js parsers because their do not work well with math formulas.
 
+I wrote [usage for some parsers](https://github.com/UmemotoCtrl/MarkdownParser/blob/master/usageForParsers.md).
+
 ## Feature
 
 * Do not react to markdown control symbols in formula and code blocks. The math keeps the original structure.

@@ -78,8 +78,7 @@ window.onload = function() {
 	mdp = makeMDP();
 	markdownit = window.markdownit();
 	remarkable1 = new window.remarkable.Remarkable;
-
-
+	
 	mdInput = document.getElementById("mdInput");
 	article = document.getElementById("article");
 	raw     = document.getElementById("raw");
