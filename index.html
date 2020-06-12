@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Comparison Javascript Markdown Parsers</title>
+  <link rel="shortcut icon" type="image/x-icon" href="https://umemotoctrl.github.io/img/favicon.ico" />
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.min.css">
+  <style>
+body {
+  max-width: 100%;
+}
+div#article {
+  width: 54%;
+  height: fit-content;
+  float: left;
+}
+textarea#mdInput {
+  margin-right: 1%;
+  width: 45%;
+  height: 800px;
+  float: left;
+  resize: none;
+}
+div#TopMenu {
+  margin: 15px;
+  float: right;
+}
+form#selector {
+  margin-bottom: 15px;
+}
+  </style>
+  <!-- remarkable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/remarkable/2.0.1/remarkable.min.js" integrity="sha256-blWQoMt0+lqHvv7q7wShOwoWOiQITkNA/Bssik2U/08=" crossorigin="anonymous"></script>
+  <!-- commonmark -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/commonmark/0.29.1/commonmark.min.js" integrity="sha256-cJ/MjQVItrJja/skVD57W8McWNeVq14/h4qOuq++CvI=" crossorigin="anonymous" defer></script>
+  <!-- markdown-it -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/11.0.0/markdown-it.min.js" integrity="sha256-3mv+NUxFuBg26MtcnuN2X37WUxuGunWCCiG2YCSBjNc=" crossorigin="anonymous" defer></script>
+  <!-- Showdown -->
+  <script src="https://cdn.jsdelivr.net/npm/showdown@1.9.1/dist/showdown.min.js" defer></script>
+  <!-- Marked -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/1.0.0/marked.min.js" defer></script> -->
+  <!-- Original JS -->
+  <script src="js/mdp.js" defer></script>
+  <script src="js/onlineTest.js" defer></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166116914-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-166116914-1');
+  </script>
+</head>
+
+<body>
+  <div id="TopMenu">
+    <p><b><a href="https://github.com/UmemotoCtrl/MarkdownParser">Go GitHub Repo</a></b></p>
+    <p>Processing TIme: <b id='time'></b></p>
+  </div>
+  <div id='time'></div>
+  <h1>Comparison Javascript Markdown Parsers</h1>
+   <form id="selector">
+    <h3>Parser Selection</h3>
+    <input type="radio" name="parser" value="mdp" checked>mdp
+    <input type="radio" name="parser" value="markdown-it">markdown-it
+    <input type="radio" name="parser" value="showdown">showdown
+    <input type="radio" name="parser" value="marked">marked
+    <input type="radio" name="parser" value="commonmark">commonmark
+    <input type="radio" name="parser" value="remarkable">remarkable
+  </form>
+  <textarea id="mdInput">Input</textarea>
+  <div id="article"></div>
+  <h2>Parsed HTML</h2>
+  <pre><code id="raw"></code></pre>
+  <hr>
+  <p> Various Javascript Markdown parsers and MathJax are used to display this page. Google Chrome is recommended.</p>
+  <p>Copyright (c) 2020 Kazuki Umemoto</p>
+</body>
+</html>
