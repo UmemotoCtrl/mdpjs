@@ -3,7 +3,7 @@
 # Access localhost:8800
 
 CURRENT=`dirname "$0"`
-cd "$CURRENT/docs"
+cd "$CURRENT"
 
 python -m SimpleHTTPServer 8800
 exit
