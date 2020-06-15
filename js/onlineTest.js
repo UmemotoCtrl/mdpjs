@@ -1,25 +1,3 @@
-// for MathJax
-(function () {
-	window.MathJax = {
-		tex: {
-		inlineMath: [['$', '$'], ['\\(', '\\)']]
-		},
-		svg: {
-		fontCache: 'global'
-		}
-	};
-	var scriptIE = document.createElement("script");
-	scriptIE.src  = "https://polyfill.io/v3/polyfill.min.js?features=es6";
-	document.getElementsByTagName("head")[0].appendChild(scriptIE);
-	var script = document.createElement("script");
-	script.type = "text/javascript";
-	script.src  = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js";
-	document.getElementsByTagName("head")[0].appendChild(script);
-	script.onload = (function () {
-		// console.log(MathJax);
-	})();
-})();
-
 var mdInput;
 var article;
 var raw;
@@ -90,4 +68,29 @@ window.onload = function() {
 	writeHTML();
 	mdInput.oninput = writeHTML;
 	selector.onchange = writeHTML;
+
+	// for MathJax
+	(function () {
+		window.MathJax = {
+			tex: {
+			inlineMath: [['$', '$'], ['\\(', '\\)']]
+			},
+			svg: {
+			fontCache: 'global'
+			}
+		};
+		var scriptIE = document.createElement("script");
+		scriptIE.src  = "https://polyfill.io/v3/polyfill.min.js?features=es6";
+		scriptIE.async = true;
+		document.getElementsByTagName("head")[0].appendChild(scriptIE);
+		var script = document.createElement("script");
+		script.type = "text/javascript";
+		script.src  = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js";
+		script.async = true;
+		document.getElementsByTagName("head")[0].appendChild(script);
+		script.onload = (function () {
+			// console.log(MathJax);
+		})();
+	})();
+
 };
