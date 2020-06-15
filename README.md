@@ -15,7 +15,7 @@ I wrote [usage for some parsers](https://github.com/UmemotoCtrl/MarkdownParser/b
 Add the following to header 
 
 ```html
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/UmemotoCtrl/MarkdownParser@master/docs/js/mdp.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/UmemotoCtrl/MarkdownParser@0.1/js/mdp.js"></script>
 ```
 
 then execute
