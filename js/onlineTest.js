@@ -1,17 +1,3 @@
-var mdInput;
-var article;
-var raw;
-var selector;
-var radioList;
-var timeDiv;
-
-var mdp;
-var showdownConverter = new showdown.Converter();
-var commonmarkReader = new commonmark.Parser();
-var commonmarkWriter = new commonmark.HtmlRenderer();
-var remarkable1;
-var markdownit;
-
 let writeHTML = function () {
 	var htmlTxt;
 	var startTime;
@@ -22,7 +8,7 @@ let writeHTML = function () {
 		endTime = performance.now();
 	} else if ( radioNodeList.value == "markdown-it" ) {
 		startTime = performance.now();
-		htmlTxt = markdownit.render(mdInput.value);
+		htmlTxt = markdownit1.render(mdInput.value);
 		endTime = performance.now();
 	} else if ( radioNodeList.value == "showdown" ) {
 		startTime = performance.now();
@@ -47,15 +33,26 @@ let writeHTML = function () {
 	timeDiv.innerHTML = (endTime - startTime).toFixed(3) + "(ms)";
 	raw.innerHTML = htmlTxt.replace(/</g,'&lt;').replace(/>/g,'&gt;');
 	// raw.innerHTML = mdp.analyzeStructure(mdInput.value);
-	if ( MathJax.typesetPromise )
-		MathJax.typesetPromise();
+	if ( typeof MathJax != "undefined" )
+		MathJax.typesetPromise(article.childNodes);
 	// console.log ( mdInput.value.replace(/\\/g,'\\\\').replace(/\n/g,'\\n') );
 }
 
+var mdInput;
+var article;
+var raw;
+var selector;
+var radioNodeList;
+var timeDiv;
+
+var mdp = makeMDP();
+var showdownConverter = new showdown.Converter();
+var commonmarkReader = new commonmark.Parser();
+var commonmarkWriter = new commonmark.HtmlRenderer();
+var remarkable1 = new remarkable.Remarkable();
+var markdownit1 = new markdownit();
+
 window.onload = function() {
-	mdp = makeMDP();
-	markdownit = window.markdownit();
-	remarkable1 = new window.remarkable.Remarkable;
 	
 	mdInput = document.getElementById("mdInput");
 	article = document.getElementById("article");
@@ -69,28 +66,27 @@ window.onload = function() {
 	mdInput.oninput = writeHTML;
 	selector.onchange = writeHTML;
 
-	// for MathJax
+	// for MathJax IIFE (Immediately Invoked Function Expression)
 	(function () {
-		window.MathJax = {
-			tex: {
-			inlineMath: [['$', '$'], ['\\(', '\\)']]
-			},
-			svg: {
-			fontCache: 'global'
-			}
-		};
-		var scriptIE = document.createElement("script");
-		scriptIE.src  = "https://polyfill.io/v3/polyfill.min.js?features=es6";
-		scriptIE.async = true;
-		document.getElementsByTagName("head")[0].appendChild(scriptIE);
-		var script = document.createElement("script");
-		script.type = "text/javascript";
-		script.src  = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js";
-		script.async = true;
-		document.getElementsByTagName("head")[0].appendChild(script);
-		script.onload = (function () {
-			// console.log(MathJax);
-		})();
+        window.MathJax = {
+          tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+          },
+          svg: {
+          fontCache: 'global'
+          }
+        };
+        var scriptIE = document.createElement("script");
+        scriptIE.src  = "https://polyfill.io/v3/polyfill.min.js?features=es6";
+        scriptIE.async = true;
+        document.getElementsByTagName("head")[0].appendChild(scriptIE);
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src  = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js";
+        script.async = true;
+        document.getElementsByTagName("head")[0].appendChild(script);
+        script.onload = (function () {
+          // console.log(MathJax);
+        })();
 	})();
-
 };

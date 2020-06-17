@@ -11,7 +11,7 @@ There is enough usage description in [Github Repository](https://github.com/mark
 In html header, add
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@1.1.0/marked.min.js" integrity="sha256-GGbzkRkTtLnv3bOg61WAnkjYHxtsiVqu+tjMj6ssDVw=" crossorigin="anonymous"></script>
 ```
 
 Then, in your script,
@@ -48,7 +48,7 @@ There is also almost enough usage description in [Github Repository](https://git
 In html header, add
 
 ```html
-<script <script src="https://cdn.jsdelivr.net/npm/showdown@1.9.1/dist/showdown.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/showdown@1.9.1/dist/showdown.min.js" integrity="sha256-jl1+DOsSs9uABTKppOJ2GF8kXoc3XQzBtFFyS0i9Xoo=" crossorigin="anonymous"></script>
 ```
 
 Then, in your script,
@@ -69,8 +69,8 @@ See [Github Repository](https://github.com/markdown-it/markdown-it). In html hea
 Then, in your script,
 
 ```javascript
-var md = window.markdownit();
-var parsedHtml = md.render(markdown_source);
+var mdit = new markdownit();
+var parsedHtml = mdit.render(markdown_source);
 ```
 
 ## remarkable
@@ -86,13 +86,7 @@ In html header, add
 Then, in your script,
 
 ```javascript
-var remarkable1;  // For convenience, global variable is defined.
-window.onload = function() {
-	// This need to be in onload function.
-	remarkable1 = new window.remarkable.Remarkable;
-}
-
-// You can write follows anywhere in your script.
+var remarkable1 = new remarkable.Remarkable();
 var parsedHtml = remarkable1.render(markdown_source);
 ```
 
