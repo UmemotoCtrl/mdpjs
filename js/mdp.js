@@ -62,13 +62,15 @@ let makeMDP = function () {
 			provisionalText: delimiter+"CB"+delimiter,
 			matchRegex: new RegExp("^`{3}.*?\\n[\\s\\S]*?\\n`{3}$", 'gm'),
 			converter: function ( argBlock ) {
+				// $ will be reduced in replace method using $1 group.
+				var temp = argBlock.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace( /\$/g, "$$$$");
 				if (/^`{3}.+$/m.test(argBlock))
-					return argBlock.replace( /\$/g, "$$$$").replace(	// $ will be reduced in replace method
+					return temp.replace(	
 						new RegExp("^`{3}(.+?)\\n([\\s\\S]*)\\n`{3}$"),
 						'<pre><code class="'+codeLangPrefix+'$1">$2</code></pre>'
 					);
 				else
-					return argBlock.replace( /\$/g, "$$$$").replace(
+					return temp.replace(
 						new RegExp("^`{3}\\n([\\s\\S]*)\\n`{3}$"),
 						"<pre><code>$1</code></pre>"
 					);
