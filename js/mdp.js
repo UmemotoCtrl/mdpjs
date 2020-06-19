@@ -27,8 +27,8 @@
 // mdp.addInlineSyntax ({	// this is sample for img
 // 	tag: "IG",
 // 	priority: 60,
-// 	provisionalText: '<img url="$2" alt="$1"></img>',
-// 	matchRegex: new RegExp("!\\[(.+?)\\]\\((.+?)\\)", 'g'),
+// 	provisionalText: '<img src="$2" alt="$1">',
+// 	matchRegex: new RegExp("!\\[(.*?)\\]\\((.+?)\\)", 'g'),
 // 	converter: function ( argBlock ) {
 // 		return null;
 // 	},
@@ -48,11 +48,12 @@
 // });
 // mdp.removeBlockSyntax("H1");
 
-let makeMDP = function () {
+let makeMDP = function (argConfig) {
 	let makeBlockSyntax = function (argObj) {
 		const delimiter = argObj.config.delimiter;
 		const mathDelimiter = argObj.config.mathDelimiter;
 		const codeLangPrefix = argObj.config.codeLangPrefix;
+		const spacesForNest = argObj.config.spacesForNest;
 		let cAr = new Array();
 
 		// The order is important.
@@ -134,7 +135,7 @@ let makeMDP = function () {
 			converter: function ( argBlock ) {
 				var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
-				return Obj.mdInlineParser( temp, Obj.mdBlockquoteParser );
+				return Obj.mdInlineParser( Obj.mdBlockquoteParser(temp), null );
 			},
 			convertedHTML: new Array()
 		});
@@ -144,9 +145,10 @@ let makeMDP = function () {
 			provisionalText: delimiter+"TB"+delimiter,
 			matchRegex: new RegExp("^\\|.+?\\| *\\n\\|[-:| ]*\\| *\\n\\|.+?\\|[\\s\\S]*?(?=\\n\\n)", 'gm'),
 			converter: function ( argBlock ) {
-				var temp = argBlock
+				argBlock = Obj.mdInlineParserFormer(argBlock);
+					var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
-				return Obj.mdInlineParser( temp, Obj.mdTBParser );
+				return Obj.mdInlineParserLatter(Obj.mdTBParser(temp));
 			},
 			convertedHTML: new Array()
 		});
@@ -157,15 +159,9 @@ let makeMDP = function () {
 			matchRegex: new RegExp('^ *\\d+?\\. [\\s\\S]*?$(?!\\n\\s*^ *\\d+?\\. |\\n\\s*^ {2,}.+$)(?=\\n\\n)'+'|'
 					+'^ *[-+*] [\\s\\S]*?$(?!\\n\\s*^ *[-+*] |\\n\\s*^ {2,}.+$)(?=\\n\\n)', 'gm'),
 			converter: function ( argBlock ) {
-				if ( /^ *$/m.test(argBlock) ) {	// loose list
-					argBlock = argBlock.replace(/^( *[-+*] )([\s\S]*?)(?=\n *$|\n *[-+*] .*$)/gm, '$1<p>$2</p>');
-					argBlock = argBlock.replace(/^( *\\d+?\\. )([\s\S]*?)(?=\n *$|\n *\\d+?\\. .*$)/gm, '$1<p>$2</p>');
-					argBlock = argBlock.replace(/^$\n^ {2,}(?![-+*] |\\d+?\\. )(.*)$/gm, '<p>$1</p>');
-					argBlock = argBlock.replace(/^ *\n/gm, '');
-				}
 				var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
-				return Obj.mdInlineParser( temp, Obj.mdListParser );
+				return Obj.mdInlineParser( Obj.mdListParser(temp, spacesForNest), null );
 			},
 			convertedHTML: new Array()
 		});
@@ -207,7 +203,14 @@ let makeMDP = function () {
 			},
 			convertedHTML: new Array()
 		});
-
+		cAr.push ({	// img
+			tag: "IG",
+			priority: 60,
+			provisionalText: '<img src="$2" alt="$1">',
+			matchRegex: new RegExp("!\\[(.*?)\\]\\((.+?)\\)", 'g'),
+			converter: function ( argBlock ) {return null;},
+			convertedHTML: new Array()
+		});
 		cAr.push ({	// Anchor Link
 			tag: "AC",	// Just for use array management.
 			priority: 50,
@@ -248,6 +251,7 @@ let makeMDP = function () {
 			delimiter: "&&",		// delimiter for structure expression
 			mathDelimiter: new Array(["\\${2}", "\\${2}"], ["\\\\\[", "\\\\\]"]),
 			// in Regex form, = "$$ ... $$", and "\[ ... \]"
+			spacesForNest: 2,			// number of spaces for nested lists.
 			tabTo: "  ",			// \t -> two spaces
 			codeLangPrefix: "language-"		// ```clang ... ``` -> <pre><code class="language-clang"> ... </code></pre>
 		},
@@ -312,8 +316,7 @@ let makeMDP = function () {
 			return false;
 		},
 
-		mdInlineParser: function ( argText, argFunc ) {
-			const delimiter = this.config.delimiter;
+		mdInlineParserFormer: function ( argText ) {
 			let cAr = this.inlineSyntax;
 			for (let ii = 0; ii < (cAr||[]).length; ii++) {
 				cAr[ii].convertedHTML = argText.match(  cAr[ii].matchRegex );
@@ -322,16 +325,21 @@ let makeMDP = function () {
 				}
 				argText = argText.replace( cAr[ii].matchRegex, cAr[ii].provisionalText );
 			}
-		
-			if (argFunc != null)
-				argText = argFunc(argText);
-			
+			return argText;
+		},
+		mdInlineParserLatter: function ( argText ) {
+			const delimiter = this.config.delimiter;
+			let cAr = this.inlineSyntax;
 			for (let ii = 0; ii < (cAr||[]).length; ii++) {
 				for (let jj = 0; jj < (cAr[ii].convertedHTML||[]).length; jj++) {
 					argText = argText.replace( delimiter+delimiter+cAr[ii].tag+delimiter+delimiter, cAr[ii].convertedHTML[jj] );
 				}
 			}
 			return argText;
+		},
+		mdInlineParser: function ( argText ) {
+			argText = this.mdInlineParserFormer(argText);
+			return this.mdInlineParserLatter(argText);
 		},
 		mdTBParser: function ( argText ) {
 			let retText = "";
@@ -372,7 +380,7 @@ let makeMDP = function () {
 			retText +=  "</tbody></table>";
 			return retText;
 		},
-		mdListParser: function ( argText ) {
+		mdListParser: function ( argText, spacesForNest ) {
 			let checkListDepth = function ( argLine ) {
 				let listType = checkListType ( argLine );
 				let spaceRegex;
@@ -399,6 +407,9 @@ let makeMDP = function () {
 				else
 					return "RW";
 			}
+			let loose;
+			if ( /^ *$/m.test(argText) ) loose = true;
+			else loose = false;
 			let lines = argText.split(/\n/g);
 			let depth = checkListDepth(lines[0]);
 			let listType = checkListType(lines[0]);
@@ -411,30 +422,29 @@ let makeMDP = function () {
 			retText += "<"+listType.toLowerCase()+"><li>";
 			let lineDepth, lineType;
 			let tempText = "";
-			let nestLineType;
 			for (let jj = 0; jj < (lines||[]).length; jj++) {
 				lineDepth = checkListDepth(lines[jj]);
 				lineType = checkListType(lines[jj]);
 				if ( lineDepth == depth && lineType == listType) {	// add new item
 					if (tempText != "") {
-						retText += arguments.callee ( tempText.replace(/\n*$/, ""), nestLineType ).replace(/\n*$/, "");
+						retText += this.mdListParser( tempText.replace(/\n*$/, ""), spacesForNest ).replace(/\n*$/, "");
 						tempText = "";
 					}
-					retText += "</li>\n<li>"+lines[jj].replace(listRegex, "$1") + "\n";
-				} else if ( lineDepth >= depth+2 ) {	// create nested list
-					if (tempText == "")
-						nestLineType = lineType;
+					if (loose) retText += "</li>\n<li><p>"+lines[jj].replace(listRegex, "$1") + "</p>\n";
+					else retText += "</li>\n<li>"+lines[jj].replace(listRegex, "$1") + "\n";
+				} else if ( lineDepth >= depth+this.config.spacesForNest) {	// create nested list
 					tempText += lines[jj]+"\n";
 				} else {	// simple paragraph
 					if (tempText != "") {
 						tempText += lines[jj]+"\n";
 					} else {
-						retText += lines[jj]+"\n";
+						if (loose) retText += '<p>'+lines[jj]+'</p>\n';
+						else retText += lines[jj]+"\n";
 					}
 				}
 			}
 			if (tempText != "") {
-				retText += arguments.callee ( tempText.replace(/\n*$/, ""), nestLineType ).replace(/\n*$/, "");
+				retText += this.mdListParser( tempText.replace(/\n*$/, ""), spacesForNest ).replace(/\n*$/, "");
 			}
 	
 			retText += "</li></"+listType.toLowerCase()+">";
@@ -451,14 +461,14 @@ let makeMDP = function () {
 					tempText += lineText[kk] + "\n";
 				} else {
 					if ( tempText != "" ) {
-						retText += arguments.callee(tempText) + "\n";
+						retText += this.mdBlockquoteParser(tempText) + "\n";
 						tempText = "";
 					}
 					retText += lineText[kk] + "\n";
 				}
 			}
 			if (tempText != "")
-				retText += arguments.callee(tempText);
+				retText += this.mdBlockquoteParser(tempText);
 			return retText + '\n</blockquote>';
 		},
 
@@ -495,6 +505,14 @@ let makeMDP = function () {
 			}
 			return argText;
 		}
+	}
+
+	if (typeof argConfig != 'undefined') {
+		if (typeof argConfig.delimiter != 'undefined') Obj.config.delimiter = argConfig.delimiter;
+		if (typeof argConfig.mathDelimiter != 'undefined') Obj.config.mathDelimiter = argConfig.mathDelimiter;
+		if (typeof argConfig.spacesForNest != 'undefined') Obj.config.spacesForNest = argConfig.spacesForNest;
+		if (typeof argConfig.tabTo != 'undefined') Obj.config.tabTo = argConfig.tabTo;
+		if (typeof argConfig.codeLangPrefix != 'undefined') Obj.config.codeLangPrefix = argConfig.codeLangPrefix;
 	}
 	Obj.blockSyntax = makeBlockSyntax(Obj);
 	Obj.inlineSyntax = makeInlineSyntax(Obj);

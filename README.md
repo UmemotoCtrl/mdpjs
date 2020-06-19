@@ -3,6 +3,8 @@ A somewhat functional JavaScript Markdown parser, affinity with formulas [Web Si
 
 This script aims to use in Client-side and was made as alternative for existing js parsers because their do not work well with math formulas.
 
+Probably the only option intended to be used in conjunction with mathjax (or katex)!
+
 ## Feature
 
 * Do not react to markdown control symbols in formula and code blocks. The math keeps the original structure.
@@ -13,7 +15,7 @@ This script aims to use in Client-side and was made as alternative for existing 
 Add the following to header 
 
 ```html
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/UmemotoCtrl/MarkdownParser@0.1/js/mdp.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/UmemotoCtrl/MarkdownParser@0.1.1/js/mdp.js"></script>
 ```
 
 then execute
