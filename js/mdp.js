@@ -54,6 +54,7 @@ let makeMDP = function (argConfig) {
 		const mathDelimiter = argObj.config.mathDelimiter;
 		const codeLangPrefix = argObj.config.codeLangPrefix;
 		const spacesForNest = argObj.config.spacesForNest;
+		const latexEnv = argObj.config.latexEnv;
 		let cAr = new Array();
 
 		// The order is important.
@@ -78,6 +79,16 @@ let makeMDP = function (argConfig) {
 			},
 			convertedHTML: new Array()
 		});
+		for (let jj = 0; jj < (latexEnv||[]).length; jj++) {
+			cAr.push ( {// Math Environment
+				tag: "M"+jj,
+				priority: 85,
+				provisionalText: delimiter+"M"+jj+delimiter,
+				matchRegex: new RegExp('^\\\\begin{'+latexEnv[jj]+'}[\\s\\S]*?\\\\end{'+latexEnv[jj]+'}$', 'gm'),
+				converter: function ( argBlock ) { return argBlock },
+				convertedHTML: new Array()
+			});
+		}
 		var mathRegEx = "";
 		for (let jj = 0; jj < (mathDelimiter||[]).length; jj++) {
 			mathRegEx += "^"+mathDelimiter[jj][0]+"\\n[\\s\\S]+?\\n"+mathDelimiter[jj][1]+"$|";
@@ -251,6 +262,7 @@ let makeMDP = function (argConfig) {
 			delimiter: "&&",		// delimiter for structure expression
 			mathDelimiter: new Array(["\\${2}", "\\${2}"], ["\\\\\[", "\\\\\]"]),
 			// in Regex form, = "$$ ... $$", and "\[ ... \]"
+			latexEnv: new Array('equation', 'eqnarray', 'align', 'align\\*'),
 			spacesForNest: 2,			// number of spaces for nested lists.
 			tabTo: "  ",			// \t -> two spaces
 			codeLangPrefix: "language-"		// ```clang ... ``` -> <pre><code class="language-clang"> ... </code></pre>
@@ -513,6 +525,7 @@ let makeMDP = function (argConfig) {
 		if (typeof argConfig.spacesForNest != 'undefined') Obj.config.spacesForNest = argConfig.spacesForNest;
 		if (typeof argConfig.tabTo != 'undefined') Obj.config.tabTo = argConfig.tabTo;
 		if (typeof argConfig.codeLangPrefix != 'undefined') Obj.config.codeLangPrefix = argConfig.codeLangPrefix;
+		if (typeof argConfig.latexEnv != 'undefined') Obj.config.latexEnv = argConfig.latexEnv;
 	}
 	Obj.blockSyntax = makeBlockSyntax(Obj);
 	Obj.inlineSyntax = makeInlineSyntax(Obj);
