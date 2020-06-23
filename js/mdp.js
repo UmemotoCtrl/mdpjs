@@ -382,11 +382,16 @@ let makeMDP = function (argConfig) {
 				items = lineText[kk].split(/\s*\|+\s*/g);
 				let colDivText = lineText[kk].replace(/\s/g, "").match(/\|+/g);
 				retText +=  "<tr>\n";
-				for (let jj = 0; jj < (colDivText||[]).length; jj++)
-					if (colDivText[jj] == "|")
-						retText +=  "<td"+alignText[jj]+">" + items[jj] + "</td>\n";
-					else
-						retText +=  "<td"+alignText[jj]+" colspan='"+colDivText[jj].length+"'>" + items[jj] + "</td>\n";
+				let num = 0;
+				for (let jj = 0; jj < (colDivText||[]).length; jj++) {
+					if (colDivText[jj] == "|") {
+						retText +=  "<td"+alignText[num]+">" + items[jj] + "</td>\n";
+						num += 1;
+					} else {
+						retText +=  "<td"+alignText[num]+" colspan='"+colDivText[jj].length+"'>" + items[jj] + "</td>\n";
+						num += colDivText[jj].length;
+					}
+				}
 				retText +=  "</tr>\n";
 			}
 			retText +=  "</tbody></table>";
