@@ -28,6 +28,10 @@ let writeHTML = function () {
 		startTime = performance.now();
 		htmlTxt = remarkable1.render(mdInput.value);
 		endTime = performance.now();
+	} else if ( radioNodeList.value == "pagedown" ) {
+		startTime = performance.now();
+		htmlTxt = pagedown.makeHtml(mdInput.value);
+		endTime = performance.now();
 	}
 	article.innerHTML = htmlTxt;
 	timeDiv.innerHTML = (endTime - startTime).toFixed(3) + "(ms)";
@@ -72,6 +76,8 @@ var commonmarkReader = new commonmark.Parser();
 var commonmarkWriter = new commonmark.HtmlRenderer();
 var remarkable1 = new remarkable.Remarkable();
 var markdownit1 = new markdownit();
+var pagedown = new Markdown.Converter();
+Markdown.Extra.init(pagedown);
 
 window.onload = function() {
 	
@@ -82,7 +88,7 @@ window.onload = function() {
 	timeDiv = document.getElementById("time");
 	radioNodeList = selector.parser;
 	
-	mdInput.value = "# Comparison Javascript Markdown Parsers\n\nThis is demo for mdpjs.js. For detail information, see [GitHub Repo](https://github.com/UmemotoCtrl/MarkdownParser).\n\n## You can change Markdown parser. Parser Option\n\n* markdown-it, [repo](https://github.com/markdown-it/markdown-it)\n* Showdown, [repo](https://github.com/showdownjs/showdown)\n* Marked, [repo](https://github.com/markedjs/marked)\n* commonmark, [repo](https://github.com/commonmark/commonmark.js)\n* remarkable, [repo](https://github.com/jonschlinkert/remarkable)\n\n## Inline notation\n\n1. *em*\n1. **strong**\n1. ~~strike~~\n1. `code`\n1. [Anchor link to GitHub Repo](https://github.com/UmemotoCtrl/MarkdownParser)\n1. Inline math $\\| f(x)\\|$\n\n## Block notation\n\n### Table\n\n| A | B | C |\n| :---:  | ---:  | :--- |\n| $|\\alpha |$ | $|\\beta |$ ||\n| 1 || 2 |\n\n### Math formula in independent line\n\n\\[\n\\tag{1} \\dfrac{\\partial y}{\\partial x} = x\n\\]\n\n$$\n\\tag{2} f(x) :=\\begin{cases}1,\\quad &\\mbox{if}~ x\\neq 0 \\\\ 0,\\quad &\\mbox{if}~ x = 0\\end{cases}\n$$\n\n### List\n\n* a\n* b\n  1. A\n  1. B\n\n### Code block\n\n```markdown\n* a\n* b\n  1. A\n  1. B\n```\n\n### Horizontal rule\n\n---\n\n### Comment block\n\n<!--\nThis is not shown.\n-->\n\n";
+	mdInput.value = "# Comparison Javascript Markdown Parsers\n\nThis is demo for mdpjs.js. For detail information, see [GitHub Repo](https://github.com/UmemotoCtrl/MarkdownParser).\n\n## You can change Markdown parser. Parser Option\n\n* markdown-it, [repo](https://github.com/markdown-it/markdown-it)\n* Showdown, [repo](https://github.com/showdownjs/showdown)\n* Marked, [repo](https://github.com/markedjs/marked)\n* commonmark, [repo](https://github.com/commonmark/commonmark.js)\n* remarkable, [repo](https://github.com/jonschlinkert/remarkable)\n* pagedown, [repo](https://github.com/StackExchange/pagedown)\n\n## Inline notation\n\n1. *em*\n1. **strong**\n1. ~~strike~~\n1. `code`\n1. [Anchor link to GitHub Repo](https://github.com/UmemotoCtrl/MarkdownParser)\n1. Inline math $\\| f(x)\\|$\n\n## Block notation\n\n### Table\n\n| A | B | C |\n| :---:  | ---:  | :--- |\n| $|\\alpha |$ | $|\\beta |$ ||\n| 1 || 2 |\n\n### Math formula in independent line\n\n\\[\n\\tag{1} \\dfrac{\\partial y}{\\partial x} = x\n\\]\n\n$$\n\\tag{2} f(x) :=\\begin{cases}1,\\quad &\\mbox{if}~ x\\neq 0 \\\\ 0,\\quad &\\mbox{if}~ x = 0\\end{cases}\n$$\n\n### List\n\n* a\n* b\n  1. A\n  1. B\n\n### Code block\n\n```markdown\n* a\n* b\n  1. A\n  1. B\n```\n\n### Horizontal rule\n\n---\n\n### Comment block\n\n<!--\nThis is not shown.\n-->\n\n";
 	writeHTML();
 	mdInput.oninput = writeHTML;
 	selector.onchange = writeHTML;
