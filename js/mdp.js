@@ -1,7 +1,7 @@
 //
 // MIT License
 // Copyright (c) 2020 Kazuki UMEMOTO
-// see https://github.com/UmemotoCtrl/MarkdownParser/blob/master/LICENSE for details
+// see https://github.com/UmemotoCtrl/MarkdownParser for details
 //
 
 // 
@@ -22,7 +22,7 @@
 // 		converter: function ( argBlock ) {
 // 			return "<hr>";
 // 		},
-// 		convertedHTML: new Array()
+// 		matchedString: new Array()
 // });
 // mdp.addInlineSyntax ({	// this is sample for img
 // 	tag: "IG",
@@ -32,7 +32,7 @@
 // 	converter: function ( argBlock ) {
 // 		return null;
 // 	},
-// 	convertedHTML: new Array()
+// 	matchedString: new Array()
 // });
 // mdp.addBlockSyntax ({	// this is sample for Setext headings
 // 	tag: "SH",
@@ -44,7 +44,7 @@
 // 			.replace( new RegExp('^ *(.+)\\n.*$'), '<h1 id="$1">$1</h1>' );
 // 		return mdp.mdInlineParser(temp, null);
 // 	},
-// 	convertedHTML: new Array()
+// 	matchedString: new Array()
 // });
 // mdp.removeBlockSyntax("H1");
 
@@ -61,11 +61,9 @@ let makeMDP = function (argConfig) {
 		cAr.push ( {	// Code block with code name
 			tag: "CB",
 			priority: 100,
-			provisionalText: delimiter+"CB"+delimiter,
 			matchRegex: new RegExp("^`{3}.*?\\n[\\s\\S]*?\\n`{3}$", 'gm'),
 			converter: function ( argBlock ) {
-				// $ will be reduced in replace method using $1 group.
-				var temp = argBlock.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace( /\$/g, "$$$$");
+				var temp = argBlock.replace(/</g,'&lt;').replace(/>/g,'&gt;');
 				if (/^`{3}.+$/m.test(argBlock))
 					return temp.replace(	
 						new RegExp("^`{3}(.+?)\\n([\\s\\S]*)\\n`{3}$"),
@@ -77,43 +75,42 @@ let makeMDP = function (argConfig) {
 						"<pre><code>$1</code></pre>"
 					);
 			},
-			convertedHTML: new Array()
+			matchedString: new Array()
 		});
+		var mathRegEx = '';// Math Environment
 		for (let jj = 0; jj < (latexEnv||[]).length; jj++) {
-			cAr.push ( {// Math Environment
-				tag: "M"+jj,
-				priority: 85,
-				provisionalText: delimiter+"M"+jj+delimiter,
-				matchRegex: new RegExp('^\\\\begin{'+latexEnv[jj]+'}[\\s\\S]*?\\\\end{'+latexEnv[jj]+'}$', 'gm'),
-				converter: function ( argBlock ) { return argBlock },
-				convertedHTML: new Array()
-			});
-		}
-		var mathRegEx = "";
-		for (let jj = 0; jj < (mathDelimiter||[]).length; jj++) {
-			mathRegEx += "^"+mathDelimiter[jj][0]+"\\n[\\s\\S]+?\\n"+mathDelimiter[jj][1]+"$|";
+			mathRegEx += '^\\\\begin{'+latexEnv[jj]+'} *.*$\\n(^ *.+ *$\\n)*^[ .]*\\\\end{'+latexEnv[jj]+'} *$|';
 		}
 		mathRegEx = mathRegEx.replace(/\|$/, '');
-		cAr.push ( {// Math blocks
+		cAr.push ( {
+			tag: 'ME',
+			priority: 85,
+			matchRegex: new RegExp(mathRegEx, 'gm'),
+			converter: function ( argBlock ) { return '<div class="mdpmath">'+argBlock+'</div>' },
+			matchedString: new Array()
+		});
+		var mathRegEx = "";// Math blocks
+		for (let jj = 0; jj < (mathDelimiter||[]).length; jj++) {
+			mathRegEx += "^"+mathDelimiter[jj][0]+" *.*$\\n(^ *.+ *$\\n)*^[ .]*"+mathDelimiter[jj][1]+"$|";
+		}
+		mathRegEx = mathRegEx.replace(/\|$/, '');
+		cAr.push ( {
 			tag: "MB",
 			priority: 80,
-			provisionalText: delimiter+"MB"+delimiter,
 			matchRegex: new RegExp(mathRegEx, 'gm'),
 			converter: function ( argBlock ) {
-				return argBlock.replace( /\$/g, "$$$$").replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
+				return '<div class="mdpmath">'+argBlock.replace(/^\n*|\n*$/g, "")+'</div>';
 			},
-			convertedHTML: new Array()
+			matchedString: new Array()
 		});
 		cAr.push ( {	// HTML comment block
 			tag: "CM",
 			priority: 70,
-			provisionalText: delimiter+"CM"+delimiter,
 			matchRegex: new RegExp("^<!--[\\s\\S]*?-->$", 'gm'),
 			converter: function ( argBlock ) {
-				return argBlock.replace( /\$/g, "$$$$")
-					.replace( new RegExp("^(<!--[\\s\\S]*?-->)$"), "$1" );
+				return argBlock.replace( new RegExp("^(<!--[\\s\\S]*?-->)$"), "$1" );
 			},
-			convertedHTML: new Array()
+			matchedString: new Array()
 		});
 		cAr.push ( {
 			tag: "HD",
@@ -126,7 +123,7 @@ let makeMDP = function (argConfig) {
 					.replace( new RegExp('^\\n*#{1,} +(.+?)[\\s#]*$'), '<h'+num+' id="$1">$1</h'+num+'>' );
 				return Obj.mdInlineParser(temp, null);
 			},
-			convertedHTML: new Array()
+			matchedString: new Array()
 		});
 		cAr.push ( {	// Horizontal Rule
 			tag: "HR",
@@ -136,24 +133,22 @@ let makeMDP = function (argConfig) {
 			converter: function ( argBlock ) {
 				return "<hr>";
 			},
-			convertedHTML: new Array()
+			matchedString: new Array()
 		});
 		cAr.push ( {	// Blockquote
 			tag: "BQ",
 			priority: 40,
-			provisionalText: delimiter+"BQ"+delimiter,
 			matchRegex: new RegExp("^ *> *[\\s\\S]*?(?=\\n\\n)", 'gm'),
 			converter: function ( argBlock ) {
 				var temp = argBlock
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
 				return Obj.mdInlineParser( Obj.mdBlockquoteParser(temp), null );
 			},
-			convertedHTML: new Array()
+			matchedString: new Array()
 		});
 		cAr.push ( {	// Table
 			tag: "TB",
 			priority: 30,
-			provisionalText: delimiter+"TB"+delimiter,
 			matchRegex: new RegExp("^\\|.+?\\| *\\n\\|[-:| ]*\\| *\\n\\|.+?\\|[\\s\\S]*?(?=\\n\\n)", 'gm'),
 			converter: function ( argBlock ) {
 				argBlock = Obj.mdInlineParserFormer(argBlock);
@@ -161,12 +156,11 @@ let makeMDP = function (argConfig) {
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
 				return Obj.mdInlineParserLatter(Obj.mdTBParser(temp));
 			},
-			convertedHTML: new Array()
+			matchedString: new Array()
 		});
 		cAr.push ( {	// List
 			tag: "LT",
 			priority: 20,
-			provisionalText: delimiter+"LT"+delimiter,
 			matchRegex: new RegExp('^ *\\d+?\\. [\\s\\S]*?$(?!\\n\\s*^ *\\d+?\\. |\\n\\s*^ {2,}.+$)(?=\\n\\n)'+'|'
 					+'^ *[-+*] [\\s\\S]*?$(?!\\n\\s*^ *[-+*] |\\n\\s*^ {2,}.+$)(?=\\n\\n)', 'gm'),
 			converter: function ( argBlock ) {
@@ -174,45 +168,46 @@ let makeMDP = function (argConfig) {
 					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
 				return Obj.mdInlineParser( Obj.mdListParser(temp, spacesForNest), null );
 			},
-			convertedHTML: new Array()
+			matchedString: new Array()
 		});
 		cAr.push ( {	// Paragraph
 			tag: "PP",
 			priority: 0,
-			provisionalText: delimiter+"PP"+delimiter,
 			matchRegex: new RegExp('^.(?!'+delimiter[0]+'.{2}'+delimiter+')[\\s\\S]*?\\n$', 'gm'),
 			converter: function ( argBlock ) {
-				var temp = argBlock
-					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "<p>$1</p>" );
-					return Obj.mdInlineParser(temp, null);
+				var temp = '<p>'+argBlock.replace( /^\n*|\n*$/g, "" )+'</p>';
+				return Obj.mdInlineParser(temp, null);
 			},
-			convertedHTML: new Array()
+			matchedString: new Array()
 		});
 		return cAr;
 	}
 	let makeInlineSyntax = function (argObj) {
-		const delimiter = argObj.config.delimiter;
+		const subsDollar = argObj.config.subsDollar;
 		let cAr = new Array();
 		cAr.push ({	// inline code
 			tag: "IC",
 			priority: 100,
-			provisionalText: delimiter+delimiter+"IC"+delimiter+delimiter,
-			// should include delimiter+tag+delimiter
 			matchRegex: new RegExp("`.+?`", 'g'),
 			converter: function ( argBlock ) {
-				return "<code>"+ argBlock.replace( /\$/g, "$$$$$$").replace(/`(.+?)`/g,"$1").replace(/</g,'&lt;').replace(/>/g,'&gt;') +"</code>";
+				return "<code>"+ argBlock.replace(/`(.+?)`/g,"$1").replace(/</g,'&lt;').replace(/>/g,'&gt;') +"</code>";
 			},
-			convertedHTML: new Array()
+			matchedString: new Array()
 		});
 		cAr.push ({	// inline math
 			tag: "IM",
 			priority: 90,
-			provisionalText: delimiter+delimiter+"IM"+delimiter+delimiter,
-			matchRegex: new RegExp("\\$.+?\\$", 'g'),
-			converter: function ( argBlock ) {
-				return argBlock;
-			},
-			convertedHTML: new Array()
+			matchRegex: new RegExp(subsDollar+".+?"+subsDollar, 'g'),
+			converter: function ( argBlock ) { return '<span class="mdpmath">'+argBlock+'</span>'; },
+			matchedString: new Array()
+		});
+		cAr.push ({	// math reference
+			tag: "RF",
+			priority: 70,
+			provisionalText: '<span class="mdpmath">\\$1ref{$2}</span>',
+			matchRegex: new RegExp('\\\\(eq)?ref{(.*)}', 'g'),
+			converter: function ( argBlock ) {return null;},
+			matchedString: new Array()
 		});
 		cAr.push ({	// img
 			tag: "IG",
@@ -220,7 +215,7 @@ let makeMDP = function (argConfig) {
 			provisionalText: '<img src="$2" alt="$1">',
 			matchRegex: new RegExp("!\\[(.*?)\\]\\((.+?)\\)", 'g'),
 			converter: function ( argBlock ) {return null;},
-			convertedHTML: new Array()
+			matchedString: new Array()
 		});
 		cAr.push ({	// Anchor Link
 			tag: "AC",	// Just for use array management.
@@ -228,7 +223,7 @@ let makeMDP = function (argConfig) {
 			provisionalText: '<a href="$2">$1</a>',					// the string is used for replace.
 			matchRegex: new RegExp("\\[(.+?)\\]\\((.+?)\\)", 'g'),	// the RexExp is used for replace.
 			converter: function ( argBlock ) {return null;},
-			convertedHTML: new Array()
+			matchedString: new Array()
 		});
 		cAr.push ({		// Strong
 			tag: "SO",	// Just for use array management.
@@ -236,7 +231,7 @@ let makeMDP = function (argConfig) {
 			provisionalText: '<strong>$1</strong>',
 			matchRegex: new RegExp("\\*\\*(.+?)\\*\\*", 'g'),
 			converter: function ( argBlock ) {return null;},
-			convertedHTML: new Array()
+			matchedString: new Array()
 		});
 		cAr.push ({	// Emphasize
 			tag: "EM",	// Just for use array management.
@@ -244,7 +239,7 @@ let makeMDP = function (argConfig) {
 			provisionalText: '<em>$1</em>',
 			matchRegex: new RegExp("\\*(.+?)\\*", 'g'),
 			converter: function ( argBlock ) {return null;},
-			convertedHTML: new Array()
+			matchedString: new Array()
 		});
 		cAr.push ({	// Strike
 			tag: "SI",	// Just for use array management.
@@ -252,7 +247,7 @@ let makeMDP = function (argConfig) {
 			provisionalText: '<strike>$1</strike>',
 			matchRegex: new RegExp("~~(.+?)~~", 'g'),
 			converter: function ( argBlock ) {return null;},
-			convertedHTML: new Array()
+			matchedString: new Array()
 		});
 		return cAr;
 	}
@@ -260,7 +255,8 @@ let makeMDP = function (argConfig) {
 	let Obj = {
 		config: {
 			delimiter: "&&",		// delimiter for structure expression
-			mathDelimiter: new Array(["\\${2}", "\\${2}"], ["\\\\\[", "\\\\\]"]),
+			subsDollar: "&MDPDL&",
+			mathDelimiter: new Array(["$$", "$$"], ["\\\\\\[", "\\\\\\]"]),
 			// in Regex form, = "$$ ... $$", and "\[ ... \]"
 			latexEnv: new Array('equation', 'eqnarray', 'align', 'align\\*'),
 			spacesForNest: 2,			// number of spaces for nested lists.
@@ -331,10 +327,13 @@ let makeMDP = function (argConfig) {
 		mdInlineParserFormer: function ( argText ) {
 			let cAr = this.inlineSyntax;
 			for (let ii = 0; ii < (cAr||[]).length; ii++) {
-				cAr[ii].convertedHTML = argText.match(  cAr[ii].matchRegex );
-				for (let jj = 0; jj < (cAr[ii].convertedHTML||[]).length; jj++) {
-					cAr[ii].convertedHTML[jj] = cAr[ii].converter(cAr[ii].convertedHTML[jj]);
+				cAr[ii].matchedString = argText.match(  cAr[ii].matchRegex );
+				for (let jj = 0; jj < (cAr[ii].matchedString||[]).length; jj++) {
+					cAr[ii].matchedString[jj] = cAr[ii].converter(cAr[ii].matchedString[jj]);
 				}
+				if (typeof cAr[ii].provisionalText == 'undefined')
+					cAr[ii].provisionalText = this.config.delimiter+this.config.delimiter
+						+cAr[ii].tag+this.config.delimiter+this.config.delimiter;
 				argText = argText.replace( cAr[ii].matchRegex, cAr[ii].provisionalText );
 			}
 			return argText;
@@ -343,8 +342,8 @@ let makeMDP = function (argConfig) {
 			const delimiter = this.config.delimiter;
 			let cAr = this.inlineSyntax;
 			for (let ii = 0; ii < (cAr||[]).length; ii++) {
-				for (let jj = 0; jj < (cAr[ii].convertedHTML||[]).length; jj++) {
-					argText = argText.replace( delimiter+delimiter+cAr[ii].tag+delimiter+delimiter, cAr[ii].convertedHTML[jj] );
+				for (let jj = 0; jj < (cAr[ii].matchedString||[]).length; jj++) {
+					argText = argText.replace( delimiter+delimiter+cAr[ii].tag+delimiter+delimiter, cAr[ii].matchedString[jj] );
 				}
 			}
 			return argText;
@@ -494,14 +493,14 @@ let makeMDP = function (argConfig) {
 			// pre-formatting
 			argText = argText.replace(/\r\n?/g, "\n");	// Commonize line break codes between Win and mac.
 			argText = argText.replace(/\t/g, this.config.tabTo);
+			argText = argText.replace(/\$/g, this.config.subsDollar);
 			argText = "\n"+ argText + "\n\n";
 			
 			// Convert to Structure Notation
 			for (let ii = 0; ii < (cAr||[]).length; ii++) {
-				cAr[ii].convertedHTML =  argText.match(cAr[ii].matchRegex);
-				for (let jj = 0; jj < (cAr[ii].convertedHTML||[]).length; jj++) {
-					cAr[ii].convertedHTML[jj] = cAr[ii].converter(cAr[ii].convertedHTML[jj]);
-				}
+				cAr[ii].matchedString =  argText.match(cAr[ii].matchRegex);
+				if (typeof cAr[ii].provisionalText == 'undefined')
+					cAr[ii].provisionalText = this.config.delimiter+cAr[ii].tag+this.config.delimiter;
 				argText = argText.replace( cAr[ii].matchRegex, cAr[ii].provisionalText );
 			}
 			argText = argText.replace(/\n{2,}/g, "\n");
@@ -516,21 +515,24 @@ let makeMDP = function (argConfig) {
 
 			// Restore to html
 			for (let ii = (cAr||[]).length-1; ii >= 0; ii--) {
-				for (let jj = 0; jj < (cAr[ii].convertedHTML||[]).length; jj++) {
-					argText = argText.replace( delimiter+cAr[ii].tag+delimiter, cAr[ii].convertedHTML[jj] );
+				for (let jj = 0; jj < (cAr[ii].matchedString||[]).length; jj++) {
+					argText = argText.replace( delimiter+cAr[ii].tag+delimiter, cAr[ii].converter(cAr[ii].matchedString[jj]) );
 				}
 			}
+			argText = argText.replace(new RegExp(this.config.subsDollar, 'g'), '$');
 			return argText;
 		}
 	}
 
 	if (typeof argConfig != 'undefined') {
-		if (typeof argConfig.delimiter != 'undefined') Obj.config.delimiter = argConfig.delimiter;
-		if (typeof argConfig.mathDelimiter != 'undefined') Obj.config.mathDelimiter = argConfig.mathDelimiter;
-		if (typeof argConfig.spacesForNest != 'undefined') Obj.config.spacesForNest = argConfig.spacesForNest;
-		if (typeof argConfig.tabTo != 'undefined') Obj.config.tabTo = argConfig.tabTo;
-		if (typeof argConfig.codeLangPrefix != 'undefined') Obj.config.codeLangPrefix = argConfig.codeLangPrefix;
-		if (typeof argConfig.latexEnv != 'undefined') Obj.config.latexEnv = argConfig.latexEnv;
+		let keys = Object.keys(argConfig);
+		for (let ii = 0; ii < (keys||[]).length; ii++)
+			Obj.config[keys[ii]] = argConfig[keys[ii]];
+	}
+	for (let ii = 0; ii < (Obj.config.mathDelimiter||[]).length; ii++) {
+		for (let jj = 0; jj < (Obj.config.mathDelimiter[ii]||[]).length; jj++) {
+			Obj.config.mathDelimiter[ii][jj] = Obj.config.mathDelimiter[ii][jj].replace(/\$/g, Obj.config.subsDollar);
+		}
 	}
 	Obj.blockSyntax = makeBlockSyntax(Obj);
 	Obj.inlineSyntax = makeInlineSyntax(Obj);

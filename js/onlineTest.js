@@ -37,8 +37,6 @@ let writeHTML = function () {
 	timeDiv.innerHTML = (endTime - startTime).toFixed(3) + "(ms)";
 	raw.innerHTML = htmlTxt.replace(/</g,'&lt;').replace(/>/g,'&gt;');
 	// raw.innerHTML = mdpjs.analyzeStructure(mdInput.value);
-	if ( typeof MathJax != "undefined" )
-		MathJax.typesetPromise(article.childNodes);
 	// console.log ( mdInput.value.replace(/\\/g,'\\\\').replace(/\n/g,'\\n') );
 }
 
@@ -50,7 +48,13 @@ var radioNodeList;
 var timeDiv;
 
 var mdpjs = makeMDP();
-// var mdpjs = makeMDP({spacesForNest: 1});		// partial configuration
+// var mdpjs = makeMDP({
+// 	delimiter: "&&",		// delimiter for structure expression
+// 	subsDollar: "&MDPDL&",
+// 	spacesForNest: 1,
+// 	tabTo: "  ",			// \t -> two spaces
+// 	codeLangPrefix: "lang-"		// ```clang ... ``` -> <pre><code class="language-clang"> ... </code></pre>
+// });
 /*
 var mdpjs = makeMDP({			// full configuration
 	delimiter: "&&",		// delimiter for structure expression
@@ -93,27 +97,39 @@ window.onload = function() {
 	mdInput.oninput = writeHTML;
 	selector.onchange = writeHTML;
 
-	// for MathJax IIFE (Immediately Invoked Function Expression)
-	(function () {
+      // MathJax Apache License Version 2.0, January 2004 http://www.apache.org/licenses/
+      (function () {
         window.MathJax = {
-          tex: {
-          inlineMath: [['$', '$'], ['\\(', '\\)']]
+          startup: {
+            pageReady: function () {
+              let observer = new MutationObserver( function () {
+                  MathJax.texReset();
+                //   MathJax.typesetPromise(document.getElementsByClassName('mdpmath'));
+                  MathJax.typesetPromise(article.childNodes);
+              });
+              observer.observe(article, {childList: true});
+              return MathJax.startup.defaultPageReady();
+            },
           },
-          svg: {
-          fontCache: 'global'
-          }
+          tex: {
+            tags: 'ams',
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+          },
+          svg: {
+            fontCache: 'global',
+          },
+          options: {
+            ignoreHtmlClass: 'tex2jax_ignore',
+          },
         };
         var scriptIE = document.createElement("script");
         scriptIE.src  = "https://polyfill.io/v3/polyfill.min.js?features=es6";
-        scriptIE.async = true;
+        scriptIE.async = false;
         document.getElementsByTagName("head")[0].appendChild(scriptIE);
         var script = document.createElement("script");
         script.type = "text/javascript";
         script.src  = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js";
         script.async = true;
         document.getElementsByTagName("head")[0].appendChild(script);
-        script.onload = (function () {
-          // console.log(MathJax);
-        })();
-	})();
+      })();
 };
