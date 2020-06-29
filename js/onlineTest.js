@@ -48,13 +48,7 @@ var radioNodeList;
 var timeDiv;
 
 var mdpjs = makeMDP();
-// var mdpjs = makeMDP({
-// 	delimiter: "&&",		// delimiter for structure expression
-// 	subsDollar: "&MDPDL&",
-// 	spacesForNest: 1,
-// 	tabTo: "  ",			// \t -> two spaces
-// 	codeLangPrefix: "lang-"		// ```clang ... ``` -> <pre><code class="language-clang"> ... </code></pre>
-// });
+// var mdpjs = makeMDP({spacesForNest: 1});		// partial configuration
 /*
 var mdpjs = makeMDP({			// full configuration
 	delimiter: "&&",		// delimiter for structure expression
@@ -80,6 +74,7 @@ var commonmarkReader = new commonmark.Parser();
 var commonmarkWriter = new commonmark.HtmlRenderer();
 var remarkable1 = new remarkable.Remarkable();
 var markdownit1 = new markdownit();
+// markdownit1.use(window.markdownitMathjax);
 var pagedown = new Markdown.Converter();
 Markdown.Extra.init(pagedown);
 
