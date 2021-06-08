@@ -1,4 +1,4 @@
-# MarkdownParser
+# mdpjs: MarkdownParser
 A somewhat functional JavaScript Markdown parser, affinity with formulas [Web Site](https://umemotoctrl.github.io/MarkdownParser/).
 
 This script aims to use in Client-side and was made as alternative for existing js parsers because their do not work well with math formulas.
