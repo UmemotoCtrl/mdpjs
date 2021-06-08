@@ -15,7 +15,7 @@ Probably the only option intended to be used in conjunction with mathjax (or kat
 Add the following to header 
 
 ```html
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/UmemotoCtrl/MarkdownParser@0.1.4/js/mdp.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/UmemotoCtrl/mdpjs@0.1.4/js/mdp.js"></script>
 ```
 
 then execute
