@@ -1,7 +1,7 @@
 # mdpjs: MarkdownParser
 
 [![](https://data.jsdelivr.com/v1/package/gh/UmemotoCtrl/mdpjs/badge?style=rounded)](https://www.jsdelivr.com/package/gh/UmemotoCtrl/mdpjs)
-A somewhat functional JavaScript Markdown parser, affinity with formulas [Web Site](https://umemotoctrl.github.io/MarkdownParser/).
+A somewhat functional JavaScript Markdown parser, affinity with formulas [Web Site](https://umemotoctrl.github.io/mdpjs/).
 
 This script aims to use in Client-side and was made as alternative for existing js parsers because their do not work well with math formulas.
 
