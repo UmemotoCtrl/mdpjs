@@ -97,6 +97,19 @@ const CASES = [
       return { pass, detail: `precode=${hasPre} hasText=${hasText} leakedAsPara=${leakedAsPara}` };
     },
   },
+  {
+    file: 'emphasis-underscore.md',
+    phase: 4,
+    desc: '_em_ and __strong__ render like *em* and **strong**',
+    check(html) {
+      const hasEmStar = html.includes('<em>single asterisks</em>');
+      const hasEmUnder = html.includes('<em>single underscores</em>');
+      const hasStrongStar = html.includes('<strong>double asterisks</strong>');
+      const hasStrongUnder = html.includes('<strong>double underscores</strong>');
+      const pass = hasEmStar && hasEmUnder && hasStrongStar && hasStrongUnder;
+      return { pass, detail: `em*=${hasEmStar} em_=${hasEmUnder} strong*=${hasStrongStar} strong__=${hasStrongUnder}` };
+    },
+  },
 ];
 
 function main() {

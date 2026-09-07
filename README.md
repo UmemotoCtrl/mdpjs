@@ -12,6 +12,8 @@ Probably the only option intended to be used in conjunction with mathjax (or kat
 * Do not react to markdown control symbols in formula and code blocks. The math keeps the original structure.
 *  `$$ ... $$` and `\[ ... \]` are supported for independent line formulas. Putting a line which should have only `$$`, `\[`, or `\]`.
 
+*  A single `$ ... $` is inline math. To write a literal dollar sign outside code blocks (e.g. shell variables like `$input`), write `&#36;` instead — it passes through untouched and renders as `$`.
+
 ## Usage
 
 Add the following to header 

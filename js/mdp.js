@@ -261,11 +261,27 @@ let makeMDP = function (argConfig) {
 			converter: function ( argBlock ) {return null;},
 			matchedString: new Array()
 		});
+		cAr.push ({		// Strong by underscore
+			tag: "SU",	// Just for use array management.
+			priority: 35,
+			provisionalText: '<strong>$1</strong>',
+			matchRegex: new RegExp("__(.+?)__", 'g'),
+			converter: function ( argBlock ) {return null;},
+			matchedString: new Array()
+		});
 		cAr.push ({	// Emphasize
 			tag: "EM",	// Just for use array management.
 			priority: 30,
 			provisionalText: '<em>$1</em>',
 			matchRegex: new RegExp("\\*(.+?)\\*", 'g'),
+			converter: function ( argBlock ) {return null;},
+			matchedString: new Array()
+		});
+		cAr.push ({	// Emphasize by underscore
+			tag: "EU",	// Just for use array management.
+			priority: 25,
+			provisionalText: '<em>$1</em>',
+			matchRegex: new RegExp("_(.+?)_", 'g'),
 			converter: function ( argBlock ) {return null;},
 			matchedString: new Array()
 		});

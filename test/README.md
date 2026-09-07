@@ -14,6 +14,7 @@ sha256 `a986b489d7024e6ee43f13127d3d914fe9665c11f8c523b6d3a0fbf52b99d2eb`).
   - `blockquote-with-blocks.md` (Phase 1): header / list / code inside quote
   - `loose-list.md` (Phase 2): multi-paragraph `<ol>` item
   - `indented-code.md` (Phase 3): 4-space code block
+  - `emphasis-underscore.md` (Phase 4): `_em_` / `__strong__`
 - `run.js` — renders each repro with `js/mdp.js`, checks structural
   assertions, prints PASS/FAIL per case. Exit 1 while any case is RED.
 - `reference/` — `mdp-current.html` (regenerated each run),
@@ -42,6 +43,10 @@ node test/run.js --dump     # also print rendered HTML per case
   save/restore (`mdBlockquoteParser` left unused).
 - Phase 2 exit: 5/5 PASS (ALL GREEN). `mdListParser` buffers continuation
   lines into paragraph groups when loose; tight path byte-identical.
+- Phase 4 exit: 6/6 PASS (ALL GREEN). New `SU`/`__strong__` (pri 35) and
+  `EU`/`_em_` (pri 25) inline entries; `*`/`**` paths untouched. Single-`$`
+  misfire intentionally not fixed in code — top `README.md` documents the
+  `&#36;` workaround instead.
 
 Known Phase 3 limitations (deliberate, minimal scope):
 - `    1. ...` is claimed by the list parser first (runs before `IB`);
