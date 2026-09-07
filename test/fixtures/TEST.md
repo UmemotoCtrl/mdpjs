@@ -23,6 +23,7 @@
 
 **Note:** This document is itself written using Markdown; you
 can [see the source for it by adding '.text' to the URL](/projects/markdown/syntax.text).
+This test document is a modified version by https://github.com/mxstbr/markdown-test-file of the original Markdown syntax document, which is available at [Daring Fireball](http://daringfireball.net/projects/markdown/syntax).
 
 ----
 
