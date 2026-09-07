@@ -140,13 +140,27 @@ let makeMDP = function (argConfig) {
 			priority: 40,
 			matchRegex: new RegExp("^ *> *[\\s\\S]*?(?=\\n\\n)", 'gm'),
 			converter: function ( argBlock ) {
-				var temp = argBlock
-					.replace( new RegExp("^\\n*([\\s\\S]*)\\n*$"), "$1" );
-				return Obj.mdInlineParser( Obj.mdBlockquoteParser(temp), null );
+				var lines = argBlock
+					.replace(/^\n*|\n*$/g, "")
+					.split("\n");
+				var inner = "";
+				for (var kk = 0; kk < lines.length; kk++) {
+					var m = lines[kk].match(/^(\s*)>\s?(.*)$/);
+					if (m) inner += m[1] + m[2] + "\n";
+					else inner += lines[kk] + "\n";	// lazy continuation line
+				}
+				// Recursive render clobbers this render's blockSyntax state,
+				// so save and restore matchedString around it.
+				var cArBk = Obj.blockSyntax;
+				var saved = [];
+				for (var ii = 0; ii < cArBk.length; ii++) saved.push(cArBk[ii].matchedString);
+				var html = Obj.render(inner);
+				for (var jj = 0; jj < cArBk.length; jj++) cArBk[jj].matchedString = saved[jj];
+				return "<blockquote>\n" + html.replace(/^\n+|\n+$/g, "") + "\n</blockquote>";
 			},
 			matchedString: new Array()
-		});
-		cAr.push ( {	// Table
+	});
+	cAr.push ( {	// Table
 			tag: "TB",
 			priority: 30,
 			matchRegex: new RegExp("^\\|.+?\\| *\\n\\|[-:| ]*\\| *\\n\\|.+?\\|[\\s\\S]*?(?=\\n\\n)", 'gm'),
@@ -452,6 +466,16 @@ let makeMDP = function (argConfig) {
 			retText += "<"+listType.toLowerCase()+"><li>";
 			let lineDepth, lineType;
 			let tempText = "";
+			let paraGroups = [];	// paragraph groups of current item (loose lists only)
+			let curGroup = null;
+			let flushGroups = function () {
+				for (let gg = 0; gg < paraGroups.length; gg++) {
+					if (paraGroups[gg].length == 0) continue;
+					retText += "<p>" + paraGroups[gg].join("\n") + "</p>\n";
+				}
+				paraGroups = [];
+				curGroup = null;
+			};
 			for (let jj = 0; jj < (lines||[]).length; jj++) {
 				lineDepth = checkListDepth(lines[jj]);
 				lineType = checkListType(lines[jj]);
@@ -460,23 +484,35 @@ let makeMDP = function (argConfig) {
 						retText += this.mdListParser( tempText.replace(/\n*$/, ""), spacesForNest ).replace(/\n*$/, "");
 						tempText = "";
 					}
-					if (loose) retText += "</li>\n<li><p>"+lines[jj].replace(listRegex, "$1") + "</p>\n";
+					if (loose) {
+						flushGroups();
+						retText += "</li>\n<li>";
+						curGroup = [];
+						paraGroups.push(curGroup);
+						curGroup.push(lines[jj].replace(listRegex, "$1"));
+					}
 					else retText += "</li>\n<li>"+lines[jj].replace(listRegex, "$1") + "\n";
 				} else if ( lineDepth >= depth+this.config.spacesForNest) {	// create nested list
 					tempText += lines[jj]+"\n";
 				} else {	// simple paragraph
 					if (tempText != "") {
 						tempText += lines[jj]+"\n";
+					} else if (loose) {
+						if (/^\s*$/.test(lines[jj])) curGroup = null;	// blank line starts new paragraph
+						else {
+							if (curGroup == null) { curGroup = []; paraGroups.push(curGroup); }
+							curGroup.push(lines[jj].replace(/^\s+/, ""));
+						}
 					} else {
-						if (loose) retText += '<p>'+lines[jj]+'</p>\n';
-						else retText += lines[jj]+"\n";
+						retText += lines[jj]+"\n";
 					}
 				}
 			}
 			if (tempText != "") {
 				retText += this.mdListParser( tempText.replace(/\n*$/, ""), spacesForNest ).replace(/\n*$/, "");
 			}
-	
+			if (loose) flushGroups();
+
 			retText += "</li></"+listType.toLowerCase()+">";
 			return retText.replace(/<li>\n*<\/li>/g, "");
 		},

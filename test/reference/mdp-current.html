@@ -79,58 +79,43 @@ familiar with quoting passages of text in an email message, then you
 know how to create a blockquote in Markdown. It looks best if you hard
 wrap the text and put a <code>&gt;</code> before every line:</p>
 <blockquote>
-This is a blockquote with two paragraphs. Lorem ipsum dolor sit amet,
+<p>This is a blockquote with two paragraphs. Lorem ipsum dolor sit amet,
 consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus.
-Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
-<blockquote>
-Donec sit amet nisl. Aliquam semper ipsum sit amet velit. Suspendisse
-
-
-</blockquote>
-id sem consectetuer libero luctus adipiscing.
-
+Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.</p>
+<p>Donec sit amet nisl. Aliquam semper ipsum sit amet velit. Suspendisse
+id sem consectetuer libero luctus adipiscing.</p>
 </blockquote>
 <p>Markdown allows you to be lazy and only put the <code>&gt;</code> before the first
 line of a hard-wrapped paragraph:</p>
 <blockquote>
-This is a blockquote with two paragraphs. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
-
+<p>This is a blockquote with two paragraphs. Lorem ipsum dolor sit amet,
+consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus.
+Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.</p>
 </blockquote>
 <blockquote>
-Donec sit amet nisl. Aliquam semper ipsum sit amet velit. Suspendisse id sem consectetuer libero luctus adipiscing.
-
+<p>Donec sit amet nisl. Aliquam semper ipsum sit amet velit. Suspendisse
+id sem consectetuer libero luctus adipiscing.</p>
 </blockquote>
 <p>Blockquotes can be nested (i.e. a blockquote-in-a-blockquote) by
 adding additional levels of <code>&gt;</code>:</p>
 <blockquote>
-This is the first level of quoting.
+<p>This is the first level of quoting.</p>
 <blockquote>
-<blockquote>
-This is nested blockquote.
-
-
+<p>This is nested blockquote.</p>
 </blockquote>
-Back to the first level.
-
-
-</blockquote>
+<p>Back to the first level.</p>
 </blockquote>
 <p>Blockquotes can contain other Markdown elements, including headers, lists,
 and code blocks:</p>
 <blockquote>
-## This is a header.
-<blockquote>
-1.   This is the first list item.
-
-
-</blockquote>
-2.   This is the second list item.
-<blockquote>
-Here's some example code:
-return shell_exec("echo <span class="mdpmath">$input | $</span>markdown_script");
-
-
-</blockquote>
+<h2 id="This is a header.">This is a header.</h2>
+<ol>
+<li>This is the first list item.
+</li>
+<li>This is the second list item.
+</li></ol>
+<p>Here's some example code:</p>
+<pre><code>return shell_exec("echo $input | $markdown_script");</code></pre>
 </blockquote>
 <p>Any decent text editor should make email-style quoting easy. For
 example, with BBEdit, you can make a selection and choose Increase
@@ -215,14 +200,12 @@ Suspendisse id sem consectetuer libero luctus adipiscing.
 paragraph in a list item must be indented by either 4 spaces
 or one tab:</p>
 <ol>
-<li><p>This is a list item with two paragraphs. Lorem ipsum dolor</p>
-<p>    sit amet, consectetuer adipiscing elit. Aliquam hendrerit</p>
-<p>    mi posuere lectus.</p>
-<p></p>
-<p>    Vestibulum enim wisi, viverra nec, fringilla in, laoreet</p>
-<p>    vitae, risus. Donec sit amet nisl. Aliquam semper ipsum</p>
-<p>    sit amet velit.</p>
-<p></p>
+<li><p>This is a list item with two paragraphs. Lorem ipsum dolor
+sit amet, consectetuer adipiscing elit. Aliquam hendrerit
+mi posuere lectus.</p>
+<p>Vestibulum enim wisi, viverra nec, fringilla in, laoreet
+vitae, risus. Donec sit amet nisl. Aliquam semper ipsum
+sit amet velit.</p>
 </li>
 <li><p>Suspendisse id sem consectetuer libero luctus adipiscing.</p>
 </li></ol>
@@ -231,11 +214,9 @@ paragraphs, but here again, Markdown will allow you to be
 lazy:</p>
 <ul>
 <li><p>This is a list item with two paragraphs.</p>
-<p></p>
-<p>    This is the second paragraph in the list item. You're</p>
-<p>only required to indent the first line. Lorem ipsum dolor</p>
-<p>sit amet, consectetuer adipiscing elit.</p>
-<p></p>
+<p>This is the second paragraph in the list item. You're
+only required to indent the first line. Lorem ipsum dolor
+sit amet, consectetuer adipiscing elit.</p>
 </li>
 <li><p>Another item in the same list.</p>
 </li></ul>
@@ -245,15 +226,14 @@ delimiters need to be indented:</p>
 <li>A list item with a blockquote:
 </li></ul>
 <blockquote>
-This is a blockquote  > inside a list item.
-
+<pre><code>This is a blockquote
+inside a list item.</code></pre>
 </blockquote>
 <p>To put a code block within a list item, the code block needs
 to be indented <em>twice</em> -- 8 spaces or two tabs:</p>
 <ul>
 <li><p>A list item with a code block:</p>
-<p></p>
-<p>        <code goes here></p>
+<p><code goes here></p>
 </li></ul>
 <h3 id="Code Blocks">Code Blocks</h3>
 <p>Pre-formatted code blocks are used for writing about programming or

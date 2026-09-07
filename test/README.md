@@ -36,6 +36,12 @@ node test/run.js --dump     # also print rendered HTML per case
   `blockquote-*` needs Phase 1 inner re-parse, `loose-list` needs Phase 2).
   Assertions in `run.js` unchanged except a regex fix in the
   `leakedAsPara` check (old pattern matched across tags).
+- Phase 1 exit: 4/5 PASS (all `blockquote-*` GREEN; only `loose-list` RED).
+  BQ converter now strips one `>` level incl. lazy continuations and
+  re-renders inner content via recursive `render` with `matchedString`
+  save/restore (`mdBlockquoteParser` left unused).
+- Phase 2 exit: 5/5 PASS (ALL GREEN). `mdListParser` buffers continuation
+  lines into paragraph groups when loose; tight path byte-identical.
 
 Known Phase 3 limitations (deliberate, minimal scope):
 - `    1. ...` is claimed by the list parser first (runs before `IB`);
