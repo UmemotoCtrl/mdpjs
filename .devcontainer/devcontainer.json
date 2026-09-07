@@ -1,0 +1,30 @@
+{
+  "name": "Node.js + reveal.js",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "forwardPorts": [5173],
+  "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+  "postCreateCommand": {
+    "marp-cli": "npm install -g @marp-team/marp-cli",
+    "revealjs": "cd revealjs && npm install",
+    "skills": "bash ${containerWorkspaceFolder}/.devcontainer/setup-skills.sh ${containerWorkspaceFolder}"
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.tabSize": 2,
+        "files.eol": "\n"
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "formulahendry.acp-client",
+        "saoudrizwan.claude-dev",
+        "marp-team.marp-vscode",
+        "ms-azuretools.vscode-containers"
+      ]
+    }
+  }
+}

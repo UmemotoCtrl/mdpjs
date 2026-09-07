@@ -1,0 +1,8 @@
+revealjs/node_modules/
+dist/
+*.log
+.DS_Store
+
+# Hermes skills runtime files
+hermes_skills/.usage.json*
+hermes_skills/.curator_ledger.jsonl
