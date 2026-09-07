@@ -55,3 +55,37 @@ mdp.addBlockSyntax ({	// this is sample for Setext headings
 	convertedHTML: new Array()
 });
 ```
+
+## Test
+
+```sh
+node test/run.js          # summary only, exit 1 while any case is RED
+node test/run.js --dump   # also print rendered HTML per case
+```
+
+`test/run.js` renders each `test/repro/*.md` with `js/mdp.js` and checks
+structural assertions (currently 7/7 PASS). Details: `test/README.md`.
+
+| File | Covers |
+|---|---|
+| `blockquote-paragraphs.md` | blank `>` line keeps one quote with two paragraphs |
+| `blockquote-nested.md` | `> >` yields exactly outer + one inner quote |
+| `blockquote-with-blocks.md` | header / list / indented code inside quote |
+| `loose-list.md` | multi-paragraph `<ol>` item (`<p>` count, no split/empty `<p>`) |
+| `loose-list-nested.md` | loose item with nested list (lead `<p>` before nested `<ul>`) |
+| `indented-code.md` | 4-space block becomes `<pre><code>` |
+| `emphasis-underscore.md` | `_em_` / `__strong__` render like `*` / `**` |
+
+## Size & Speed
+
+Measured 2026-09-07 with `test/fixtures/TEST.md` (9,871 bytes) on Node v24,
+500 renders each after 20 warmups (marked 18.0.11, markdown-it 15.0.1):
+
+| Parser | Avg / render | Size (raw / gzip) |
+|---|---|---|
+| mdpjs | 0.78 ms | 21,216 / 5,013 bytes |
+| marked | 0.64 ms | 43,800 / 13,322 bytes |
+| markdown-it | 0.63 ms | 117,166 / 27,384 bytes |
+
+Small is the win (half of marked, ~1/5 of markdown-it); speed is on par,
+about 20% slower on this fixture. Times are machine-dependent.
