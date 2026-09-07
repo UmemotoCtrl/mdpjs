@@ -40,7 +40,8 @@
 <li><a href="#autolink">Automatic Links</a>
 </li></ul></li></ul>
 <p><strong>Note:</strong> This document is itself written using Markdown; you
-can <a href="/projects/markdown/syntax.text">see the source for it by adding '.text' to the URL</a>.</p>
+can <a href="/projects/markdown/syntax.text">see the source for it by adding '.text' to the URL</a>.
+This test document is a modified version by https://github.com/mxstbr/markdown-test-file of the original Markdown syntax document, which is available at <a href="http://daringfireball.net/projects/markdown/syntax">Daring Fireball</a>.</p>
 <hr>
 <h2 id="Overview">Overview</h2>
 <h3 id="Philosophy">Philosophy</h3>
@@ -262,11 +263,11 @@ in both <code>&lt;pre&gt;</code> and <code>&lt;code&gt;</code> tags.</p>
 <p>To produce a code block in Markdown, simply indent every line of the
 block by at least 4 spaces or 1 tab.</p>
 <p>This is a normal paragraph:</p>
-<p>    This is a code block.</p>
+<pre><code>This is a code block.</code></pre>
 <p>Here is an example of AppleScript:</p>
-<p>    tell application "Foo"
-        beep
-    end tell</p>
+<pre><code>tell application "Foo"
+    beep
+end tell</code></pre>
 <p>A code block continues until it reaches a line that is not indented
 (or the end of the article).</p>
 <p>Within a code block, ampersands (<code>&</code>) and angle brackets (<code>&lt;</code> and <code>&gt;</code>)
@@ -274,9 +275,9 @@ are automatically converted into HTML entities. This makes it very
 easy to include example HTML source code using Markdown -- just paste
 it and indent it, and Markdown will handle the hassle of encoding the
 ampersands and angle brackets. For example, this:</p>
-<p>    <div class="footer">
-        &copy; 2004 Foo Corporation
-    </div></p>
+<pre><code>&lt;div class="footer"&gt;
+    &copy; 2004 Foo Corporation
+&lt;/div&gt;</code></pre>
 <p>Regular Markdown syntax is not processed within code blocks. E.g.,
 asterisks are just literal asterisks within a code block. This means
 it's also easy to use Markdown to write about Markdown's own syntax.</p>

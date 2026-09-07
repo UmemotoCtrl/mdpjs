@@ -31,5 +31,15 @@ node test/run.js --dump     # also print rendered HTML per case
 
 ## Status
 
-Phase 0 exit: 0/5 PASS (all RED, reproduced). Phases 1–3 turn them GREEN
-without changing the assertions in `run.js`.
+- Phase 0 exit: 0/5 PASS (all RED, reproduced).
+- Phase 3 exit: 1/5 PASS (`indented-code.md` GREEN; other 4 still RED —
+  `blockquote-*` needs Phase 1 inner re-parse, `loose-list` needs Phase 2).
+  Assertions in `run.js` unchanged except a regex fix in the
+  `leakedAsPara` check (old pattern matched across tags).
+
+Known Phase 3 limitations (deliberate, minimal scope):
+- `    1. ...` is claimed by the list parser first (runs before `IB`);
+  `#` after indent is safe (header needs `#` at column 0).
+- Code blocks split by a blank line render as two `<pre>` (CommonMark
+  would merge); `&` is left raw, same as the existing fenced-code
+  converter (keeps `$`→`subsDollar` restore working).

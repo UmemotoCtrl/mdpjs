@@ -92,7 +92,7 @@ const CASES = [
     check(html) {
       const hasPre = /<pre><code>/.test(html);
       const hasText = html.includes('This is a code block.');
-      const leakedAsPara = /<p>(\s|.)*This is a code block/.test(html);
+      const leakedAsPara = /<p>[^<]*This is a code block/.test(html);
       const pass = hasPre && hasText && !leakedAsPara;
       return { pass, detail: `precode=${hasPre} hasText=${hasText} leakedAsPara=${leakedAsPara}` };
     },

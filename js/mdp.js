@@ -169,8 +169,22 @@ let makeMDP = function (argConfig) {
 				return Obj.mdInlineParser( Obj.mdListParser(temp, spacesForNest), null );
 			},
 			matchedString: new Array()
-		});
-		cAr.push ( {	// Paragraph
+	});
+	cAr.push ( {	// Indented code block (4 spaces)
+			tag: "IB",
+			priority: 15,
+			matchRegex: new RegExp("^((?: {4}.*\\n?)+)", 'gm'),
+			converter: function ( argBlock ) {
+				var lines = argBlock.replace(/^\n+|\n+$/g, "").split("\n");
+				for (var ii = 0; ii < lines.length; ii++) {
+					lines[ii] = lines[ii].replace(/^ {4}/, "");
+				}
+				var temp = lines.join("\n").replace(/</g,'&lt;').replace(/>/g,'&gt;');
+				return "<pre><code>"+temp+"</code></pre>";
+			},
+			matchedString: new Array()
+	});
+	cAr.push ( {	// Paragraph
 			tag: "PP",
 			priority: 0,
 			matchRegex: new RegExp('^.(?!'+delimiter[0]+'.{2}'+delimiter+')[\\s\\S]*?\\n$', 'gm'),
