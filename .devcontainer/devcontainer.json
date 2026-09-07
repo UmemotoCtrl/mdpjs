@@ -11,20 +11,12 @@
     "skills": "bash ${containerWorkspaceFolder}/.devcontainer/setup-skills.sh ${containerWorkspaceFolder}"
   },
   "customizations": {
-    "vscode": {
-      "settings": {
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "editor.tabSize": 2,
-        "files.eol": "\n"
-      },
-      "extensions": [
-        "dbaeumer.vscode-eslint",
-        "formulahendry.acp-client",
-        "saoudrizwan.claude-dev",
-        "marp-team.marp-vscode",
-        "ms-azuretools.vscode-containers"
-      ]
-    }
+    "extensions": [
+      "dbaeumer.vscode-eslint",
+      "formulahendry.acp-client",
+      "saoudrizwan.claude-dev",
+      "marp-team.marp-vscode",
+      "ms-azuretools.vscode-containers"
+    ]
   }
 }
