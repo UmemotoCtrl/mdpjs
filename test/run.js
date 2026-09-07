@@ -98,6 +98,18 @@ const CASES = [
     },
   },
   {
+    file: 'loose-list-nested.md',
+    phase: 2,
+    desc: 'Loose ordered item with nested list: lead <p> before nested <ul>',
+    check(html) {
+      const iEm = html.indexOf('<em>em</em>');
+      const iUl = html.indexOf('<ul>');
+      const iStrong = html.indexOf('<strong>strong</strong>');
+      const pass = iEm !== -1 && iUl !== -1 && iStrong !== -1 && iEm < iUl && iUl < iStrong;
+      return { pass, detail: `em=${iEm} ul=${iUl} strong=${iStrong}` };
+    },
+  },
+  {
     file: 'emphasis-underscore.md',
     phase: 4,
     desc: '_em_ and __strong__ render like *em* and **strong**',

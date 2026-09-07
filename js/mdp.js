@@ -496,12 +496,12 @@ let makeMDP = function (argConfig) {
 				lineDepth = checkListDepth(lines[jj]);
 				lineType = checkListType(lines[jj]);
 				if ( lineDepth == depth && lineType == listType) {	// add new item
+					if (loose) flushGroups();
 					if (tempText != "") {
 						retText += this.mdListParser( tempText.replace(/\n*$/, ""), spacesForNest ).replace(/\n*$/, "");
 						tempText = "";
 					}
 					if (loose) {
-						flushGroups();
 						retText += "</li>\n<li>";
 						curGroup = [];
 						paraGroups.push(curGroup);
@@ -524,10 +524,10 @@ let makeMDP = function (argConfig) {
 					}
 				}
 			}
+			if (loose) flushGroups();
 			if (tempText != "") {
 				retText += this.mdListParser( tempText.replace(/\n*$/, ""), spacesForNest ).replace(/\n*$/, "");
 			}
-			if (loose) flushGroups();
 
 			retText += "</li></"+listType.toLowerCase()+">";
 			return retText.replace(/<li>\n*<\/li>/g, "");
