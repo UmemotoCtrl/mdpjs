@@ -7,8 +7,7 @@
   "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
   "postCreateCommand": {
     "marp-cli": "npm install -g @marp-team/marp-cli",
-    "revealjs": "cd revealjs && npm install",
-    "skills": "bash ${containerWorkspaceFolder}/.devcontainer/setup-skills.sh ${containerWorkspaceFolder}"
+    "revealjs": "cd revealjs && npm install"
   },
   "customizations": {
     "extensions": [
@@ -18,5 +17,12 @@
       "marp-team.marp-vscode",
       "ms-azuretools.vscode-containers"
     ]
-  }
+  },
+  "mounts": [
+    // Docker Container間共有のnamed volumeを使いて、Cline、Hermes Agentの設定を引き継ぐ。
+    // targetはパス直接指定でないとビルドエラー
+    "source=setting-node-cline,target=/root/.cline,type=volume",
+    "source=setting-node-claude,target=/root/.claude,type=volume",
+    "source=setting-node-hermes,target=/root/.hermes,type=volume"
+  ]
 }

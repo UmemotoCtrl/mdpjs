@@ -24,11 +24,8 @@ RUN apt-get update \
 # - --skip-computer-use : cua-driver (Computer Use) のダウンロードをスキップ
 RUN curl -fsSL https://hermes-agent.nousresearch.com/install.sh -o /tmp/hermes-install.sh \
     && bash /tmp/hermes-install.sh --skip-setup --non-interactive --skip-browser --skip-computer-use \
-    && rm -f /tmp/hermes-install.sh \
-    && if [ -d /root/.hermes ]; then \
-        cp -r /root/.hermes /home/node/.hermes \
-        && chown -R node:node /home/node/.hermes; \
-    fi
+    && rm -f /tmp/hermes-install.sh
+
 
 # Claude Code をインストールする (公式インストーラスクリプト経由)
 RUN curl -fsSL https://claude.ai/install.sh | bash
